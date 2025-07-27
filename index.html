@@ -36,7 +36,7 @@
         window.firebaseAuth = auth;
         window.firebaseAnalytics = analytics;
         
-        // Firebase functions
+        // Firebase Firestore functions
         window.firebaseFunctions = {
             addDoc,
             getDocs,
@@ -47,12 +47,10 @@
             onSnapshot,
             query,
             orderBy,
-            limit,
-            signInAnonymously,
-            onAuthStateChanged
+            limit
         };
 
-        // Make auth functions available globally
+        // Firebase Auth functions
         window.firebaseAuthFunctions = {
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
@@ -60,6 +58,13 @@
             onAuthStateChanged,
             updateProfile
         };
+
+        // Make all functions available globally for easier access
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.signOut = signOut;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.updateProfile = updateProfile;
 
         // Don't auto-login, wait for user action
         console.log('🔥 Firebase inicializado, aguardando login...');
@@ -838,8 +843,8 @@
             showLoginLoading();
             
             const authFunction = isRegistering ? 
-                window.firebaseAuthFunctions.createUserWithEmailAndPassword :
-                window.firebaseAuthFunctions.signInWithEmailAndPassword;
+                window.createUserWithEmailAndPassword :
+                window.signInWithEmailAndPassword;
             
             authFunction(window.firebaseAuth, email, password)
                 .then(async (userCredential) => {
@@ -848,7 +853,7 @@
                     
                     // Set display name for new users
                     if (isRegistering && displayName) {
-                        await window.firebaseAuthFunctions.updateProfile(user, {
+                        await window.updateProfile(user, {
                             displayName: displayName
                         });
                         currentUser = displayName;
@@ -1035,8 +1040,8 @@
         function logout() {
             if (confirm('Tem certeza que deseja sair?')) {
                 // Sign out from Firebase
-                if (window.firebaseAuthFunctions && window.firebaseAuth) {
-                    window.firebaseAuthFunctions.signOut(window.firebaseAuth).then(() => {
+                if (window.signOut && window.firebaseAuth) {
+                    window.signOut(window.firebaseAuth).then(() => {
                         console.log('🚪 Logout realizado com sucesso');
                     }).catch((error) => {
                         console.error('Erro no logout:', error);
@@ -2194,7 +2199,7 @@
         // Initialize Firebase data when auth is ready
         window.initFirebaseData = function() {
             isFirebaseReady = true;
-            window.firebaseFunctions.onAuthStateChanged(window.firebaseAuth, (user) => {
+            window.onAuthStateChanged(window.firebaseAuth, (user) => {
                 if (user) {
                     currentUserId = user.uid;
                     loadDataFromFirebase();
@@ -2245,8 +2250,8 @@
 
             try {
                 // Save user data to Firebase
-                const userDataRef = window.firebaseFunctions.doc(window.firebaseDb, 'users', currentUserId);
-                await window.firebaseFunctions.updateDoc(userDataRef, {
+                const userDataRef = doc(window.firebaseDb, 'users', currentUserId);
+                await updateDoc(userDataRef, {
                     userName: currentUser,
                     scheduleData,
                     tasksData,
@@ -2257,7 +2262,7 @@
                     lastUpdated: new Date().toISOString()
                 }).catch(async (error) => {
                     if (error.code === 'not-found') {
-                        await window.firebaseFunctions.addDoc(window.firebaseFunctions.collection(window.firebaseDb, 'users'), {
+                        await addDoc(collection(window.firebaseDb, 'users'), {
                             userId: currentUserId,
                             userName: currentUser,
                             scheduleData,
@@ -2281,11 +2286,11 @@
             
             try {
                 // Load user-specific data
-                const userDataRef = window.firebaseFunctions.doc(window.firebaseDb, 'users', currentUserId);
-                const userDoc = await window.firebaseFunctions.getDocs(
-                    window.firebaseFunctions.query(
-                        window.firebaseFunctions.collection(window.firebaseDb, 'users'),
-                        window.firebaseFunctions.limit(1)
+                const userDataRef = doc(window.firebaseDb, 'users', currentUserId);
+                const userDoc = await getDocs(
+                    query(
+                        collection(window.firebaseDb, 'users'),
+                        limit(1)
                     )
                 );
                 
@@ -2312,7 +2317,7 @@
                     }
                 } else {
                     // Create initial user document
-                    await window.firebaseFunctions.addDoc(window.firebaseFunctions.collection(window.firebaseDb, 'users'), {
+                    await addDoc(collection(window.firebaseDb, 'users'), {
                         userId: currentUserId,
                         userName: currentUser,
                         scheduleData: {},
@@ -2360,7 +2365,7 @@
             if (!isFirebaseReady) return;
 
             try {
-                await window.firebaseFunctions.addDoc(window.firebaseFunctions.collection(window.firebaseDb, 'chatMessages'), {
+                await addDoc(collection(window.firebaseDb, 'chatMessages'), {
                     ...message,
                     timestamp: new Date().toISOString()
                 });
@@ -2374,13 +2379,13 @@
             if (!isFirebaseReady) return;
 
             try {
-                const messagesQuery = window.firebaseFunctions.query(
-                    window.firebaseFunctions.collection(window.firebaseDb, 'chatMessages'),
-                    window.firebaseFunctions.orderBy('timestamp', 'desc'),
-                    window.firebaseFunctions.limit(50)
+                const messagesQuery = query(
+                    collection(window.firebaseDb, 'chatMessages'),
+                    orderBy('timestamp', 'desc'),
+                    limit(50)
                 );
                 
-                const querySnapshot = await window.firebaseFunctions.getDocs(messagesQuery);
+                const querySnapshot = await getDocs(messagesQuery);
                 chatMessages = [];
                 
                 querySnapshot.forEach((doc) => {
@@ -2398,7 +2403,7 @@
             if (!isFirebaseReady) return;
 
             try {
-                await window.firebaseFunctions.addDoc(window.firebaseFunctions.collection(window.firebaseDb, 'sharedContent'), {
+                await addDoc(collection(window.firebaseDb, 'sharedContent'), {
                     ...content,
                     timestamp: new Date().toISOString()
                 });
@@ -2412,13 +2417,13 @@
             if (!isFirebaseReady) return;
 
             try {
-                const contentQuery = window.firebaseFunctions.query(
-                    window.firebaseFunctions.collection(window.firebaseDb, 'sharedContent'),
-                    window.firebaseFunctions.orderBy('timestamp', 'desc'),
-                    window.firebaseFunctions.limit(20)
+                const contentQuery = query(
+                    collection(window.firebaseDb, 'sharedContent'),
+                    orderBy('timestamp', 'desc'),
+                    limit(20)
                 );
                 
-                const querySnapshot = await window.firebaseFunctions.getDocs(contentQuery);
+                const querySnapshot = await getDocs(contentQuery);
                 sharedContent = [];
                 
                 querySnapshot.forEach((doc) => {
@@ -2436,13 +2441,13 @@
             if (!isFirebaseReady) return;
 
             // Listen for new chat messages
-            const messagesQuery = window.firebaseFunctions.query(
-                window.firebaseFunctions.collection(window.firebaseDb, 'chatMessages'),
-                window.firebaseFunctions.orderBy('timestamp', 'desc'),
-                window.firebaseFunctions.limit(50)
+            const messagesQuery = query(
+                collection(window.firebaseDb, 'chatMessages'),
+                orderBy('timestamp', 'desc'),
+                limit(50)
             );
 
-            window.firebaseFunctions.onSnapshot(messagesQuery, (snapshot) => {
+            onSnapshot(messagesQuery, (snapshot) => {
                 chatMessages = [];
                 snapshot.forEach((doc) => {
                     chatMessages.unshift(doc.data());
@@ -2451,13 +2456,13 @@
             });
 
             // Listen for new shared content
-            const contentQuery = window.firebaseFunctions.query(
-                window.firebaseFunctions.collection(window.firebaseDb, 'sharedContent'),
-                window.firebaseFunctions.orderBy('timestamp', 'desc'),
-                window.firebaseFunctions.limit(20)
+            const contentQuery = query(
+                collection(window.firebaseDb, 'sharedContent'),
+                orderBy('timestamp', 'desc'),
+                limit(20)
             );
 
-            window.firebaseFunctions.onSnapshot(contentQuery, (snapshot) => {
+            onSnapshot(contentQuery, (snapshot) => {
                 sharedContent = [];
                 snapshot.forEach((doc) => {
                     sharedContent.push(doc.data());
@@ -2466,5 +2471,5 @@
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96583dcd408a344f',t:'MTc1MzU3ODQ2Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96585248d4c2bcd7',t:'MTc1MzU3OTMwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
