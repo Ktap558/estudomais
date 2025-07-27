@@ -36,31 +36,20 @@
         window.firebaseAuth = auth;
         window.firebaseAnalytics = analytics;
         
-        // Firebase Firestore functions
-        window.firebaseFunctions = {
-            addDoc,
-            getDocs,
-            updateDoc,
-            deleteDoc,
-            doc,
-            collection,
-            onSnapshot,
-            query,
-            orderBy,
-            limit,
-            where
-        };
-
+        // Make all Firebase functions available globally
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.updateDoc = updateDoc;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
+        window.collection = collection;
+        window.onSnapshot = onSnapshot;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.limit = limit;
+        window.where = where;
+        
         // Firebase Auth functions
-        window.firebaseAuthFunctions = {
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signOut,
-            onAuthStateChanged,
-            updateProfile
-        };
-
-        // Make all functions available globally for easier access
         window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
         window.signInWithEmailAndPassword = signInWithEmailAndPassword;
         window.signOut = signOut;
@@ -1121,8 +1110,6 @@
             updateScheduleDisplay();
             updateScheduleStats();
             updateTodaySchedule();
-            updateSubjectLegend();
-            updateUpcomingClasses();
         }
 
         function updateScheduleDisplay() {
@@ -2206,10 +2193,16 @@
             window.onAuthStateChanged(window.firebaseAuth, (user) => {
                 if (user) {
                     currentUserId = user.uid;
+                    currentUser = user.displayName || user.email.split('@')[0];
+                    document.getElementById('studentName').textContent = currentUser;
                     loadDataFromFirebase();
                     setupRealtimeListeners();
                     updateFirebaseStatus('connected');
-                    showNotification('🔥 Conectado ao Firebase!', 'success');
+                    console.log('🔥 Firebase conectado para usuário:', currentUser);
+                } else {
+                    isFirebaseReady = false;
+                    currentUserId = null;
+                    updateFirebaseStatus('error');
                 }
             });
         };
@@ -2253,9 +2246,17 @@
             if (!isFirebaseReady || !currentUserId) return;
 
             try {
-                // Save user data to Firebase
-                const userDataRef = doc(window.firebaseDb, 'users', currentUserId);
-                await updateDoc(userDataRef, {
+                // Find existing user document
+                const userQuery = window.query(
+                    window.collection(window.firebaseDb, 'users'),
+                    window.where('userId', '==', currentUserId),
+                    window.limit(1)
+                );
+                
+                const userSnapshot = await window.getDocs(userQuery);
+                
+                const userData = {
+                    userId: currentUserId,
                     userName: currentUser,
                     scheduleData,
                     tasksData,
@@ -2264,23 +2265,21 @@
                     gradesData,
                     achievements,
                     lastUpdated: new Date().toISOString()
-                }).catch(async (error) => {
-                    if (error.code === 'not-found') {
-                        await addDoc(collection(window.firebaseDb, 'users'), {
-                            userId: currentUserId,
-                            userName: currentUser,
-                            scheduleData,
-                            tasksData,
-                            eventsData,
-                            diaryEntries,
-                            gradesData,
-                            achievements,
-                            lastUpdated: new Date().toISOString()
-                        });
-                    }
-                });
+                };
+
+                if (!userSnapshot.empty) {
+                    // Update existing document
+                    const docRef = userSnapshot.docs[0].ref;
+                    await window.updateDoc(docRef, userData);
+                } else {
+                    // Create new document
+                    await window.addDoc(window.collection(window.firebaseDb, 'users'), userData);
+                }
+                
+                console.log('💾 Dados salvos no Firebase!');
             } catch (error) {
                 console.error('Erro ao salvar no Firebase:', error);
+                updateFirebaseStatus('error');
             }
         }
 
@@ -2289,39 +2288,37 @@
             if (!currentUserId) return;
             
             try {
-                // Load user-specific data
-                const userDataRef = doc(window.firebaseDb, 'users', currentUserId);
-                const userDoc = await getDocs(
-                    query(
-                        collection(window.firebaseDb, 'users'),
-                        limit(1)
-                    )
+                // Load user-specific data using where query
+                const userQuery = window.query(
+                    window.collection(window.firebaseDb, 'users'),
+                    window.where('userId', '==', currentUserId),
+                    window.limit(1)
                 );
                 
-                if (!userDoc.empty) {
-                    const userData = userDoc.docs[0].data();
-                    if (userData.userId === currentUserId) {
-                        scheduleData = userData.scheduleData || {};
-                        tasksData = userData.tasksData || { urgent: [], medium: [], low: [] };
-                        eventsData = userData.eventsData || [];
-                        diaryEntries = userData.diaryEntries || [];
-                        gradesData = userData.gradesData || {};
-                        achievements = userData.achievements || [];
-                        
-                        // Update displays
-                        updateScheduleDisplay();
-                        updateScheduleStats();
-                        updateTodaySchedule();
-                        updateTasksDisplay();
-                        updateCalendar();
-                        updateDiaryDisplay();
-                        updateProgressDisplay();
-                        
-                        console.log('📊 Dados do usuário carregados do Firebase!');
-                    }
+                const userSnapshot = await window.getDocs(userQuery);
+                
+                if (!userSnapshot.empty) {
+                    const userData = userSnapshot.docs[0].data();
+                    scheduleData = userData.scheduleData || {};
+                    tasksData = userData.tasksData || { urgent: [], medium: [], low: [] };
+                    eventsData = userData.eventsData || [];
+                    diaryEntries = userData.diaryEntries || [];
+                    gradesData = userData.gradesData || {};
+                    achievements = userData.achievements || [];
+                    
+                    // Update displays
+                    updateScheduleDisplay();
+                    updateScheduleStats();
+                    updateTodaySchedule();
+                    updateTasksDisplay();
+                    updateCalendar();
+                    updateDiaryDisplay();
+                    updateProgressDisplay();
+                    
+                    console.log('📊 Dados do usuário carregados do Firebase!');
                 } else {
                     // Create initial user document
-                    await addDoc(collection(window.firebaseDb, 'users'), {
+                    await window.addDoc(window.collection(window.firebaseDb, 'users'), {
                         userId: currentUserId,
                         userName: currentUser,
                         scheduleData: {},
@@ -2341,6 +2338,7 @@
                 
             } catch (error) {
                 console.error('Erro ao carregar do Firebase:', error);
+                updateFirebaseStatus('error');
                 // Fallback to localStorage
                 loadData();
             }
@@ -2369,7 +2367,7 @@
             if (!isFirebaseReady) return;
 
             try {
-                await addDoc(collection(window.firebaseDb, 'chatMessages'), {
+                await window.addDoc(window.collection(window.firebaseDb, 'chatMessages'), {
                     ...message,
                     timestamp: new Date().toISOString()
                 });
@@ -2383,13 +2381,13 @@
             if (!isFirebaseReady) return;
 
             try {
-                const messagesQuery = query(
-                    collection(window.firebaseDb, 'chatMessages'),
-                    orderBy('timestamp', 'desc'),
-                    limit(50)
+                const messagesQuery = window.query(
+                    window.collection(window.firebaseDb, 'chatMessages'),
+                    window.orderBy('timestamp', 'desc'),
+                    window.limit(50)
                 );
                 
-                const querySnapshot = await getDocs(messagesQuery);
+                const querySnapshot = await window.getDocs(messagesQuery);
                 chatMessages = [];
                 
                 querySnapshot.forEach((doc) => {
@@ -2397,8 +2395,12 @@
                 });
                 
                 updateChatDisplay();
+                console.log('💬 Mensagens do chat carregadas!');
             } catch (error) {
                 console.error('Erro ao carregar mensagens:', error);
+                // Initialize empty chat if error
+                chatMessages = [];
+                updateChatDisplay();
             }
         }
 
@@ -2407,7 +2409,7 @@
             if (!isFirebaseReady) return;
 
             try {
-                await addDoc(collection(window.firebaseDb, 'sharedContent'), {
+                await window.addDoc(window.collection(window.firebaseDb, 'sharedContent'), {
                     ...content,
                     timestamp: new Date().toISOString()
                 });
@@ -2421,13 +2423,13 @@
             if (!isFirebaseReady) return;
 
             try {
-                const contentQuery = query(
-                    collection(window.firebaseDb, 'sharedContent'),
-                    orderBy('timestamp', 'desc'),
-                    limit(20)
+                const contentQuery = window.query(
+                    window.collection(window.firebaseDb, 'sharedContent'),
+                    window.orderBy('timestamp', 'desc'),
+                    window.limit(20)
                 );
                 
-                const querySnapshot = await getDocs(contentQuery);
+                const querySnapshot = await window.getDocs(contentQuery);
                 sharedContent = [];
                 
                 querySnapshot.forEach((doc) => {
@@ -2435,8 +2437,12 @@
                 });
                 
                 updateSharedContentDisplay();
+                console.log('📋 Conteúdo compartilhado carregado!');
             } catch (error) {
                 console.error('Erro ao carregar conteúdo compartilhado:', error);
+                // Initialize empty shared content if error
+                sharedContent = [];
+                updateSharedContentDisplay();
             }
         }
 
@@ -2444,60 +2450,72 @@
         function setupRealtimeListeners() {
             if (!isFirebaseReady) return;
 
-            // Listen for new chat messages
-            const messagesQuery = query(
-                collection(window.firebaseDb, 'chatMessages'),
-                orderBy('timestamp', 'desc'),
-                limit(50)
-            );
+            try {
+                // Listen for new chat messages
+                const messagesQuery = window.query(
+                    window.collection(window.firebaseDb, 'chatMessages'),
+                    window.orderBy('timestamp', 'desc'),
+                    window.limit(50)
+                );
 
-            onSnapshot(messagesQuery, (snapshot) => {
-                chatMessages = [];
-                snapshot.forEach((doc) => {
-                    chatMessages.unshift(doc.data());
+                window.onSnapshot(messagesQuery, (snapshot) => {
+                    chatMessages = [];
+                    snapshot.forEach((doc) => {
+                        chatMessages.unshift(doc.data());
+                    });
+                    updateChatDisplay();
+                }, (error) => {
+                    console.error('Erro no listener de mensagens:', error);
                 });
-                updateChatDisplay();
-            });
 
-            // Listen for new shared content
-            const contentQuery = query(
-                collection(window.firebaseDb, 'sharedContent'),
-                orderBy('timestamp', 'desc'),
-                limit(20)
-            );
+                // Listen for new shared content
+                const contentQuery = window.query(
+                    window.collection(window.firebaseDb, 'sharedContent'),
+                    window.orderBy('timestamp', 'desc'),
+                    window.limit(20)
+                );
 
-            onSnapshot(contentQuery, (snapshot) => {
-                sharedContent = [];
-                snapshot.forEach((doc) => {
-                    sharedContent.push(doc.data());
+                window.onSnapshot(contentQuery, (snapshot) => {
+                    sharedContent = [];
+                    snapshot.forEach((doc) => {
+                        sharedContent.push(doc.data());
+                    });
+                    updateSharedContentDisplay();
+                }, (error) => {
+                    console.error('Erro no listener de conteúdo:', error);
                 });
-                updateSharedContentDisplay();
-            });
 
-            // Listen for online users
-            const onlineUsersQuery = query(
-                collection(window.firebaseDb, 'onlineUsers'),
-                orderBy('lastSeen', 'desc')
-            );
+                // Listen for online users
+                const onlineUsersQuery = window.query(
+                    window.collection(window.firebaseDb, 'onlineUsers'),
+                    window.orderBy('lastSeen', 'desc')
+                );
 
-            onSnapshot(onlineUsersQuery, (snapshot) => {
-                onlineUsers = [];
-                const now = Date.now();
+                window.onSnapshot(onlineUsersQuery, (snapshot) => {
+                    onlineUsers = [];
+                    const now = Date.now();
+                    
+                    snapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        // Consider user online if last seen within 5 minutes
+                        if (now - userData.lastSeen < 5 * 60 * 1000) {
+                            onlineUsers.push(userData);
+                        }
+                    });
+                    
+                    updateOnlineUsers();
+                }, (error) => {
+                    console.error('Erro no listener de usuários online:', error);
+                });
+
+                // Update user presence every 30 seconds
+                setInterval(updateUserPresence, 30000);
+                updateUserPresence(); // Initial update
                 
-                snapshot.forEach((doc) => {
-                    const userData = doc.data();
-                    // Consider user online if last seen within 5 minutes
-                    if (now - userData.lastSeen < 5 * 60 * 1000) {
-                        onlineUsers.push(userData);
-                    }
-                });
-                
-                updateOnlineUsers();
-            });
-
-            // Update user presence every 30 seconds
-            setInterval(updateUserPresence, 30000);
-            updateUserPresence(); // Initial update
+                console.log('🔄 Listeners em tempo real configurados!');
+            } catch (error) {
+                console.error('Erro ao configurar listeners:', error);
+            }
         }
 
         // Update user presence in Firebase
@@ -2512,25 +2530,22 @@
                     status: '🟢 Online'
                 };
 
-                // Try to update existing document or create new one
-                const userPresenceQuery = query(
-                    collection(window.firebaseDb, 'onlineUsers'),
-                    limit(1)
+                // Find existing presence document
+                const userPresenceQuery = window.query(
+                    window.collection(window.firebaseDb, 'onlineUsers'),
+                    window.where('userId', '==', currentUserId),
+                    window.limit(1)
                 );
 
-                const existingDocs = await getDocs(userPresenceQuery);
-                let docExists = false;
+                const existingDocs = await window.getDocs(userPresenceQuery);
 
-                existingDocs.forEach(async (docSnapshot) => {
-                    const data = docSnapshot.data();
-                    if (data.userId === currentUserId) {
-                        await updateDoc(doc(window.firebaseDb, 'onlineUsers', docSnapshot.id), userPresence);
-                        docExists = true;
-                    }
-                });
-
-                if (!docExists) {
-                    await addDoc(collection(window.firebaseDb, 'onlineUsers'), userPresence);
+                if (!existingDocs.empty) {
+                    // Update existing document
+                    const docRef = existingDocs.docs[0].ref;
+                    await window.updateDoc(docRef, userPresence);
+                } else {
+                    // Create new document
+                    await window.addDoc(window.collection(window.firebaseDb, 'onlineUsers'), userPresence);
                 }
 
             } catch (error) {
@@ -2543,17 +2558,14 @@
             if (!isFirebaseReady || !currentUserId) return;
 
             try {
-                const userPresenceQuery = query(
-                    collection(window.firebaseDb, 'onlineUsers'),
-                    limit(50)
+                const userPresenceQuery = window.query(
+                    window.collection(window.firebaseDb, 'onlineUsers'),
+                    window.where('userId', '==', currentUserId)
                 );
 
-                const docs = await getDocs(userPresenceQuery);
+                const docs = await window.getDocs(userPresenceQuery);
                 docs.forEach(async (docSnapshot) => {
-                    const data = docSnapshot.data();
-                    if (data.userId === currentUserId) {
-                        await deleteDoc(doc(window.firebaseDb, 'onlineUsers', docSnapshot.id));
-                    }
+                    await window.deleteDoc(docSnapshot.ref);
                 });
             } catch (error) {
                 console.error('Erro ao remover presença:', error);
@@ -2563,5 +2575,5 @@
         // Handle page unload
         window.addEventListener('beforeunload', removeUserPresence);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9658610e9470a67d',t:'MTc1MzU3OTkwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96586f9a87a6e1ab',t:'MTc1MzU4MDUwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
