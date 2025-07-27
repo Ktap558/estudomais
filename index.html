@@ -10,7 +10,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
         // Your web app's Firebase configuration
@@ -54,9 +54,11 @@
 
         // Make auth functions available globally
         window.firebaseAuthFunctions = {
-            signInAnonymously,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut,
             onAuthStateChanged,
-            signOut: () => auth.signOut()
+            updateProfile
         };
 
         // Don't auto-login, wait for user action
@@ -282,19 +284,32 @@
                 </div>
             </div>
             
-            <!-- Login Form -->
+            <!-- Login/Register Form -->
             <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-cyan-500/30 mb-6">
-                <form onsubmit="handleLogin(event)" class="space-y-4">
+                <!-- Form Toggle -->
+                <div class="flex mb-6">
+                    <button type="button" id="login-tab" onclick="showLoginForm()" 
+                            class="flex-1 py-2 px-4 text-center font-medium rounded-l-lg bg-cyan-500/30 text-cyan-200 border-r border-cyan-400/30">
+                        🔑 Entrar
+                    </button>
+                    <button type="button" id="register-tab" onclick="showRegisterForm()" 
+                            class="flex-1 py-2 px-4 text-center font-medium rounded-r-lg bg-white/10 text-cyan-300 hover:bg-white/20">
+                        📝 Cadastrar
+                    </button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
                     <div>
-                        <label class="block text-cyan-200 text-sm font-medium mb-2">Nome de Usuário</label>
-                        <input type="text" id="username" required 
+                        <label class="block text-cyan-200 text-sm font-medium mb-2">Email</label>
+                        <input type="email" id="login-email" required 
                                class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
-                               placeholder="Digite seu nome">
+                               placeholder="seu@email.com">
                     </div>
                     
                     <div>
                         <label class="block text-cyan-200 text-sm font-medium mb-2">Senha</label>
-                        <input type="password" id="password" required 
+                        <input type="password" id="login-password" required 
                                class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
                                placeholder="Digite sua senha">
                     </div>
@@ -304,43 +319,48 @@
                         🚀 Entrar
                     </button>
                 </form>
+
+                <!-- Register Form -->
+                <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-cyan-200 text-sm font-medium mb-2">Nome Completo</label>
+                        <input type="text" id="register-name" required 
+                               class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
+                               placeholder="Seu nome completo">
+                    </div>
+
+                    <div>
+                        <label class="block text-cyan-200 text-sm font-medium mb-2">Email</label>
+                        <input type="email" id="register-email" required 
+                               class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
+                               placeholder="seu@email.com">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-cyan-200 text-sm font-medium mb-2">Senha</label>
+                        <input type="password" id="register-password" required minlength="6"
+                               class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
+                               placeholder="Mínimo 6 caracteres">
+                    </div>
+
+                    <div>
+                        <label class="block text-cyan-200 text-sm font-medium mb-2">Confirmar Senha</label>
+                        <input type="password" id="register-confirm-password" required minlength="6"
+                               class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
+                               placeholder="Digite a senha novamente">
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 rounded-lg hover:from-green-400 hover:to-emerald-500 transition-all duration-300 transform hover:scale-105 neon-glow">
+                        ✨ Criar Conta
+                    </button>
+                </form>
                 
-                <div class="mt-4 text-center">
-                    <div class="text-cyan-300 text-sm mb-2">ou</div>
-                    <button onclick="loginAsGuest()" 
-                            class="text-cyan-400 hover:text-cyan-300 text-sm underline">
-                        🎯 Entrar como Visitante
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Quick Login Options -->
-            <div class="space-y-2 mb-6">
-                <div class="text-cyan-300 text-sm mb-3">Login Rápido:</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="quickLogin('Ana Silva')" 
-                            class="bg-white/10 hover:bg-white/20 text-cyan-200 py-2 px-3 rounded-lg text-sm transition-colors">
-                        👩‍🎓 Ana Silva
-                    </button>
-                    <button onclick="quickLogin('Bruno Costa')" 
-                            class="bg-white/10 hover:bg-white/20 text-cyan-200 py-2 px-3 rounded-lg text-sm transition-colors">
-                        👨‍🎓 Bruno Costa
-                    </button>
-                    <button onclick="quickLogin('Carla Lima')" 
-                            class="bg-white/10 hover:bg-white/20 text-cyan-200 py-2 px-3 rounded-lg text-sm transition-colors">
-                        👩‍🎓 Carla Lima
-                    </button>
-                    <button onclick="quickLogin('Diego Santos')" 
-                            class="bg-white/10 hover:bg-white/20 text-cyan-200 py-2 px-3 rounded-lg text-sm transition-colors">
-                        👨‍🎓 Diego Santos
-                    </button>
-                </div>
             </div>
             
             <!-- Info -->
             <div class="text-xs text-cyan-400 opacity-75">
-                💡 Use qualquer nome e senha para entrar<br>
-                ou clique em "Entrar como Visitante"
+                💡 <span id="form-info">Entre com seu email e senha ou crie uma nova conta</span>
             </div>
         </div>
     </div>
@@ -766,56 +786,126 @@
             createMatrixEffect('login-matrix-bg');
         }
 
+        // Form toggle functions
+        function showLoginForm() {
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-tab').className = 'flex-1 py-2 px-4 text-center font-medium rounded-l-lg bg-cyan-500/30 text-cyan-200 border-r border-cyan-400/30';
+            document.getElementById('register-tab').className = 'flex-1 py-2 px-4 text-center font-medium rounded-r-lg bg-white/10 text-cyan-300 hover:bg-white/20';
+            document.getElementById('form-info').textContent = 'Entre com seu email e senha';
+        }
+
+        function showRegisterForm() {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+            document.getElementById('login-tab').className = 'flex-1 py-2 px-4 text-center font-medium rounded-l-lg bg-white/10 text-cyan-300 hover:bg-white/20 border-r border-cyan-400/30';
+            document.getElementById('register-tab').className = 'flex-1 py-2 px-4 text-center font-medium rounded-r-lg bg-cyan-500/30 text-cyan-200';
+            document.getElementById('form-info').textContent = 'Crie sua conta para começar a usar o sistema';
+        }
+
         // Login functions
         function handleLogin(event) {
             event.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
             
-            if (username && password) {
-                authenticateUser(username);
+            if (email && password) {
+                authenticateUser(email, password, false);
             }
         }
 
-        function quickLogin(username) {
-            authenticateUser(username);
+        function handleRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value.trim();
+            const confirmPassword = document.getElementById('register-confirm-password').value.trim();
+            
+            if (password !== confirmPassword) {
+                showNotification('❌ As senhas não coincidem!', 'error');
+                return;
+            }
+            
+            if (name && email && password) {
+                authenticateUser(email, password, true, name);
+            }
         }
 
-        function loginAsGuest() {
-            authenticateUser('Visitante');
-        }
 
-        function authenticateUser(username) {
+
+        function authenticateUser(email, password, isRegistering, displayName = null) {
             // Show loading state
             showLoginLoading();
             
-            // Set current user
-            currentUser = username;
-            document.getElementById('studentName').textContent = username;
+            const authFunction = isRegistering ? 
+                window.firebaseAuthFunctions.createUserWithEmailAndPassword :
+                window.firebaseAuthFunctions.signInWithEmailAndPassword;
             
-            // Authenticate with Firebase
-            window.firebaseAuthFunctions.signInAnonymously(window.firebaseAuth).then(() => {
-                console.log('🔥 Firebase conectado com sucesso!');
-                if (window.initFirebaseData) {
-                    window.initFirebaseData();
-                }
-                
-                // Proceed to tech opening after successful auth
-                setTimeout(() => {
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('tech-opening').classList.remove('hidden');
-                    initTechOpening();
-                }, 1500);
-                
-            }).catch((error) => {
-                console.error('Erro ao conectar com Firebase:', error);
-                // Still proceed even if Firebase fails
-                setTimeout(() => {
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('tech-opening').classList.remove('hidden');
-                    initTechOpening();
-                }, 1500);
-            });
+            authFunction(window.firebaseAuth, email, password)
+                .then(async (userCredential) => {
+                    const user = userCredential.user;
+                    console.log('🔥 Firebase autenticado com sucesso!');
+                    
+                    // Set display name for new users
+                    if (isRegistering && displayName) {
+                        await window.firebaseAuthFunctions.updateProfile(user, {
+                            displayName: displayName
+                        });
+                        currentUser = displayName;
+                    } else {
+                        currentUser = user.displayName || user.email.split('@')[0];
+                    }
+                    
+                    document.getElementById('studentName').textContent = currentUser;
+                    
+                    if (window.initFirebaseData) {
+                        window.initFirebaseData();
+                    }
+                    
+                    // Show success message
+                    const message = isRegistering ? 
+                        '✨ Conta criada com sucesso! Bem-vindo!' : 
+                        '🎉 Login realizado com sucesso!';
+                    showNotification(message, 'success');
+                    
+                    // Proceed to tech opening after successful auth
+                    setTimeout(() => {
+                        document.getElementById('login-screen').style.display = 'none';
+                        document.getElementById('tech-opening').classList.remove('hidden');
+                        initTechOpening();
+                    }, 1500);
+                    
+                })
+                .catch((error) => {
+                    console.error('Erro na autenticação:', error);
+                    hideLoginLoading();
+                    
+                    let errorMessage = 'Erro na autenticação';
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage = '❌ Este email já está em uso!';
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = '❌ Senha muito fraca! Use pelo menos 6 caracteres.';
+                            break;
+                        case 'auth/user-not-found':
+                            errorMessage = '❌ Usuário não encontrado!';
+                            break;
+                        case 'auth/wrong-password':
+                            errorMessage = '❌ Senha incorreta!';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = '❌ Email inválido!';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMessage = '❌ Muitas tentativas. Tente novamente mais tarde.';
+                            break;
+                        default:
+                            errorMessage = `❌ ${error.message}`;
+                    }
+                    
+                    showNotification(errorMessage, 'error');
+                });
         }
 
         function showLoginLoading() {
@@ -833,6 +923,13 @@
                 </div>
             `;
             loginScreen.appendChild(loadingOverlay);
+        }
+
+        function hideLoginLoading() {
+            const loadingOverlay = document.getElementById('login-loading');
+            if (loadingOverlay) {
+                loadingOverlay.remove();
+            }
         }
 
         function initTechOpening() {
@@ -939,7 +1036,7 @@
             if (confirm('Tem certeza que deseja sair?')) {
                 // Sign out from Firebase
                 if (window.firebaseAuthFunctions && window.firebaseAuth) {
-                    window.firebaseAuthFunctions.signOut().then(() => {
+                    window.firebaseAuthFunctions.signOut(window.firebaseAuth).then(() => {
                         console.log('🚪 Logout realizado com sucesso');
                     }).catch((error) => {
                         console.error('Erro no logout:', error);
@@ -969,9 +1066,16 @@
                 document.getElementById('tech-opening').style.display = 'none';
                 document.getElementById('login-screen').style.display = 'flex';
                 
-                // Clear login form
-                document.getElementById('username').value = '';
-                document.getElementById('password').value = '';
+                // Clear login forms
+                document.getElementById('login-email').value = '';
+                document.getElementById('login-password').value = '';
+                document.getElementById('register-name').value = '';
+                document.getElementById('register-email').value = '';
+                document.getElementById('register-password').value = '';
+                document.getElementById('register-confirm-password').value = '';
+                
+                // Reset to login form
+                showLoginForm();
                 
                 // Remove loading overlay if exists
                 const loadingOverlay = document.getElementById('login-loading');
@@ -2143,6 +2247,7 @@
                 // Save user data to Firebase
                 const userDataRef = window.firebaseFunctions.doc(window.firebaseDb, 'users', currentUserId);
                 await window.firebaseFunctions.updateDoc(userDataRef, {
+                    userName: currentUser,
                     scheduleData,
                     tasksData,
                     eventsData,
@@ -2154,6 +2259,7 @@
                     if (error.code === 'not-found') {
                         await window.firebaseFunctions.addDoc(window.firebaseFunctions.collection(window.firebaseDb, 'users'), {
                             userId: currentUserId,
+                            userName: currentUser,
                             scheduleData,
                             tasksData,
                             eventsData,
@@ -2171,35 +2277,53 @@
 
         // Load data from Firebase
         async function loadDataFromFirebase() {
+            if (!currentUserId) return;
+            
             try {
-                const userQuery = window.firebaseFunctions.query(
-                    window.firebaseFunctions.collection(window.firebaseDb, 'users'),
-                    window.firebaseFunctions.limit(1)
+                // Load user-specific data
+                const userDataRef = window.firebaseFunctions.doc(window.firebaseDb, 'users', currentUserId);
+                const userDoc = await window.firebaseFunctions.getDocs(
+                    window.firebaseFunctions.query(
+                        window.firebaseFunctions.collection(window.firebaseDb, 'users'),
+                        window.firebaseFunctions.limit(1)
+                    )
                 );
-                const querySnapshot = await window.firebaseFunctions.getDocs(userQuery);
                 
-                if (!querySnapshot.empty) {
-                    const userData = querySnapshot.docs[0].data();
-                    scheduleData = userData.scheduleData || {};
-                    tasksData = userData.tasksData || { urgent: [], medium: [], low: [] };
-                    eventsData = userData.eventsData || [];
-                    diaryEntries = userData.diaryEntries || [];
-                    gradesData = userData.gradesData || {};
-                    achievements = userData.achievements || [];
-                    
-                    // Update displays
-                    updateScheduleDisplay();
-                    updateScheduleStats();
-                    updateTodaySchedule();
-                    updateTasksDisplay();
-                    updateCalendar();
-                    updateDiaryDisplay();
-                    updateProgressDisplay();
-                    
-                    console.log('📊 Dados carregados do Firebase!');
+                if (!userDoc.empty) {
+                    const userData = userDoc.docs[0].data();
+                    if (userData.userId === currentUserId) {
+                        scheduleData = userData.scheduleData || {};
+                        tasksData = userData.tasksData || { urgent: [], medium: [], low: [] };
+                        eventsData = userData.eventsData || [];
+                        diaryEntries = userData.diaryEntries || [];
+                        gradesData = userData.gradesData || {};
+                        achievements = userData.achievements || [];
+                        
+                        // Update displays
+                        updateScheduleDisplay();
+                        updateScheduleStats();
+                        updateTodaySchedule();
+                        updateTasksDisplay();
+                        updateCalendar();
+                        updateDiaryDisplay();
+                        updateProgressDisplay();
+                        
+                        console.log('📊 Dados do usuário carregados do Firebase!');
+                    }
                 } else {
-                    // Load from localStorage if no Firebase data
-                    loadData();
+                    // Create initial user document
+                    await window.firebaseFunctions.addDoc(window.firebaseFunctions.collection(window.firebaseDb, 'users'), {
+                        userId: currentUserId,
+                        userName: currentUser,
+                        scheduleData: {},
+                        tasksData: { urgent: [], medium: [], low: [] },
+                        eventsData: [],
+                        diaryEntries: [],
+                        gradesData: {},
+                        achievements: [],
+                        lastUpdated: new Date().toISOString()
+                    });
+                    console.log('👤 Novo usuário criado no Firebase!');
                 }
                 
                 // Load chat messages
@@ -2342,5 +2466,5 @@
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96582648506ee83a',t:'MTc1MzU3NzQ5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96583dcd408a344f',t:'MTc1MzU3ODQ2Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
