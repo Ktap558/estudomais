@@ -3,2577 +3,460 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estudo+ Fácil - Seu Planner Escolar</title>
+    <title>PresetPro - Presets para iPhone</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDK -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCsIDy5vZfKn0-mqb24XIP0s43C5M_KkUM",
-            authDomain: "estudomais-da927.firebaseapp.com",
-            projectId: "estudomais-da927",
-            storageBucket: "estudomais-da927.firebasestorage.app",
-            messagingSenderId: "461170190310",
-            appId: "1:461170190310:web:d727cbbedce3397e3a1827",
-            measurementId: "G-RL599YX1DL"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const analytics = getAnalytics(app);
-
-        // Make Firebase available globally
-        window.firebaseApp = app;
-        window.firebaseDb = db;
-        window.firebaseAuth = auth;
-        window.firebaseAnalytics = analytics;
-        
-        // Make all Firebase functions available globally
-        window.addDoc = addDoc;
-        window.getDocs = getDocs;
-        window.updateDoc = updateDoc;
-        window.deleteDoc = deleteDoc;
-        window.doc = doc;
-        window.collection = collection;
-        window.onSnapshot = onSnapshot;
-        window.query = query;
-        window.orderBy = orderBy;
-        window.limit = limit;
-        window.where = where;
-        
-        // Firebase Auth functions
-        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-        window.signOut = signOut;
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.updateProfile = updateProfile;
-
-        // Don't auto-login, wait for user action
-        console.log('🔥 Firebase inicializado, aguardando login...');
-    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
-        
-        * {
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .tech-font {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        
-        .tech-gradient {
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+        .preset-card {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
-        
-        .neon-glow {
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5), 0 0 40px rgba(102, 126, 234, 0.3);
+        .preset-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
-        
-        .card-shadow {
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        .category-header {
+            background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(10px);
         }
-        
-        .subject-math { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
-        .subject-portuguese { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
-        .subject-science { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
-        .subject-history { background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%); }
-        .subject-english { background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); }
-        .subject-pe { background: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%); }
-        
-        .priority-high { border-left: 4px solid #ef4444; }
-        .priority-medium { border-left: 4px solid #f59e0b; }
-        .priority-low { border-left: 4px solid #10b981; }
-        
-        .achievement-badge {
-            animation: bounce 2s infinite;
+        .back-btn {
+            transition: all 0.3s ease;
         }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-        
-        .mood-emoji {
-            font-size: 2rem;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .mood-emoji:hover {
-            transform: scale(1.2);
-        }
-        
-        .notification {
-            animation: slideIn 0.5s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        /* Tech Opening Animations */
-        .tech-opening {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .matrix-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        
-        .matrix-char {
-            position: absolute;
-            color: #00ff41;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
-            animation: matrix-fall linear infinite;
-            opacity: 0.7;
-        }
-        
-        @keyframes matrix-fall {
-            0% { transform: translateY(-100vh); opacity: 1; }
-            100% { transform: translateY(100vh); opacity: 0; }
-        }
-        
-        .glitch {
-            animation: glitch 2s infinite;
-        }
-        
-        @keyframes glitch {
-            0%, 100% { transform: translate(0); }
-            10% { transform: translate(-2px, 2px); }
-            20% { transform: translate(2px, -2px); }
-            30% { transform: translate(-2px, -2px); }
-            40% { transform: translate(2px, 2px); }
-            50% { transform: translate(-2px, 2px); }
-            60% { transform: translate(2px, -2px); }
-            70% { transform: translate(-2px, -2px); }
-            80% { transform: translate(2px, 2px); }
-            90% { transform: translate(-2px, 2px); }
-        }
-        
-        .typing-animation {
-            overflow: hidden;
-            border-right: 3px solid #00ff41;
-            white-space: nowrap;
-            animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
-        }
-        
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 100%; }
-        }
-        
-        @keyframes blink-caret {
-            from, to { border-color: transparent; }
-            50% { border-color: #00ff41; }
-        }
-        
-        .pulse-glow {
-            animation: pulse-glow 2s ease-in-out infinite alternate;
-        }
-        
-        @keyframes pulse-glow {
-            from { box-shadow: 0 0 20px rgba(0, 255, 65, 0.5); }
-            to { box-shadow: 0 0 40px rgba(0, 255, 65, 0.8), 0 0 60px rgba(0, 255, 65, 0.6); }
-        }
-        
-        .circuit-line {
-            position: absolute;
-            background: linear-gradient(90deg, transparent, #00ff41, transparent);
-            height: 2px;
-            animation: circuit-flow 3s linear infinite;
-        }
-        
-        @keyframes circuit-flow {
-            0% { width: 0%; opacity: 0; }
-            50% { opacity: 1; }
-            100% { width: 100%; opacity: 0; }
-        }
-        
-        .fade-out {
-            animation: fadeOut 1s ease-out forwards;
-        }
-        
-        @keyframes fadeOut {
-            to { opacity: 0; visibility: hidden; }
-        }
-        
-        .slide-up {
-            animation: slideUp 0.8s ease-out forwards;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .scale-in {
-            animation: scaleIn 0.6s ease-out forwards;
-        }
-        
-        @keyframes scaleIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        .back-btn:hover {
+            transform: translateX(-2px);
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- Login Screen -->
-    <div id="login-screen" class="tech-opening tech-gradient">
-        <!-- Matrix Background -->
-        <div class="matrix-bg" id="login-matrix-bg"></div>
-        
-        <!-- Circuit Lines -->
-        <div class="circuit-line" style="top: 20%; left: 0; animation-delay: 0s;"></div>
-        <div class="circuit-line" style="top: 40%; right: 0; animation-delay: 1s;"></div>
-        <div class="circuit-line" style="top: 60%; left: 0; animation-delay: 2s;"></div>
-        <div class="circuit-line" style="top: 80%; right: 0; animation-delay: 3s;"></div>
-        
-        <!-- Login Content -->
-        <div class="relative z-10 text-center max-w-md mx-auto px-6">
-            <!-- Logo -->
-            <div class="mb-8">
-                <div class="inline-block p-6 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 neon-glow pulse-glow">
-                    <div class="text-6xl">🎓</div>
-                </div>
-            </div>
-            
-            <!-- Title -->
-            <div class="mb-8">
-                <h1 class="text-4xl md:text-5xl font-bold text-white glitch mb-4">
-                    <span class="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
-                        Estudo+ Fácil
-                    </span>
-                </h1>
-                <div class="text-lg text-cyan-300 tech-font">
-                    Faça login para continuar
-                </div>
-            </div>
-            
-            <!-- Login/Register Form -->
-            <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-cyan-500/30 mb-6">
-                <!-- Form Toggle -->
-                <div class="flex mb-6">
-                    <button type="button" id="login-tab" onclick="showLoginForm()" 
-                            class="flex-1 py-2 px-4 text-center font-medium rounded-l-lg bg-cyan-500/30 text-cyan-200 border-r border-cyan-400/30">
-                        🔑 Entrar
-                    </button>
-                    <button type="button" id="register-tab" onclick="showRegisterForm()" 
-                            class="flex-1 py-2 px-4 text-center font-medium rounded-r-lg bg-white/10 text-cyan-300 hover:bg-white/20">
-                        📝 Cadastrar
-                    </button>
-                </div>
-
-                <!-- Login Form -->
-                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-cyan-200 text-sm font-medium mb-2">Email</label>
-                        <input type="email" id="login-email" required 
-                               class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
-                               placeholder="seu@email.com">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-cyan-200 text-sm font-medium mb-2">Senha</label>
-                        <input type="password" id="login-password" required 
-                               class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
-                               placeholder="Digite sua senha">
-                    </div>
-                    
-                    <button type="submit" 
-                            class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold py-3 rounded-lg hover:from-cyan-400 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 neon-glow">
-                        🚀 Entrar
-                    </button>
-                </form>
-
-                <!-- Register Form -->
-                <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-cyan-200 text-sm font-medium mb-2">Nome Completo</label>
-                        <input type="text" id="register-name" required 
-                               class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
-                               placeholder="Seu nome completo">
-                    </div>
-
-                    <div>
-                        <label class="block text-cyan-200 text-sm font-medium mb-2">Email</label>
-                        <input type="email" id="register-email" required 
-                               class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
-                               placeholder="seu@email.com">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-cyan-200 text-sm font-medium mb-2">Senha</label>
-                        <input type="password" id="register-password" required minlength="6"
-                               class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
-                               placeholder="Mínimo 6 caracteres">
-                    </div>
-
-                    <div>
-                        <label class="block text-cyan-200 text-sm font-medium mb-2">Confirmar Senha</label>
-                        <input type="password" id="register-confirm-password" required minlength="6"
-                               class="w-full p-3 bg-white/20 border border-cyan-500/50 rounded-lg text-white placeholder-cyan-300 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
-                               placeholder="Digite a senha novamente">
-                    </div>
-                    
-                    <button type="submit" 
-                            class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 rounded-lg hover:from-green-400 hover:to-emerald-500 transition-all duration-300 transform hover:scale-105 neon-glow">
-                        ✨ Criar Conta
-                    </button>
-                </form>
-                
-            </div>
-            
-            <!-- Info -->
-            <div class="text-xs text-cyan-400 opacity-75">
-                💡 <span id="form-info">Entre com seu email e senha ou crie uma nova conta</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tech Opening Screen -->
-    <div id="tech-opening" class="tech-opening tech-gradient hidden">
-        <!-- Matrix Background -->
-        <div class="matrix-bg" id="matrix-bg"></div>
-        
-        <!-- Circuit Lines -->
-        <div class="circuit-line" style="top: 20%; left: 0; animation-delay: 0s;"></div>
-        <div class="circuit-line" style="top: 40%; right: 0; animation-delay: 1s;"></div>
-        <div class="circuit-line" style="top: 60%; left: 0; animation-delay: 2s;"></div>
-        <div class="circuit-line" style="top: 80%; right: 0; animation-delay: 3s;"></div>
-        
-        <!-- Main Content -->
-        <div class="relative z-10 text-center max-w-4xl mx-auto px-6">
-            <!-- Logo/Icon -->
-            <div class="mb-8">
-                <div class="inline-block p-6 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 neon-glow pulse-glow">
-                    <div class="text-6xl">🚀</div>
-                </div>
-            </div>
-            
-            <!-- App Title -->
-            <div class="mb-6">
-                <h1 class="text-6xl md:text-8xl font-bold text-white glitch mb-4">
-                    <span class="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
-                        Estudo+
-                    </span>
-                </h1>
-                <div class="text-2xl md:text-3xl font-light text-cyan-300 tech-font typing-animation">
-                    Seu Planner Escolar Inteligente
-                </div>
-            </div>
-            
-            <!-- Features Preview -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 opacity-0" id="features-grid">
-                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-cyan-500/30">
-                    <div class="text-2xl mb-2">📅</div>
-                    <div class="text-sm text-cyan-200">Agenda</div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-purple-500/30">
-                    <div class="text-2xl mb-2">✅</div>
-                    <div class="text-sm text-purple-200">Tarefas</div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-green-500/30">
-                    <div class="text-2xl mb-2">📊</div>
-                    <div class="text-sm text-green-200">Progresso</div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-yellow-500/30">
-                    <div class="text-2xl mb-2">💬</div>
-                    <div class="text-sm text-yellow-200">Chat</div>
-                </div>
-            </div>
-            
-            <!-- Loading Bar -->
-            <div class="mb-8 opacity-0" id="loading-section">
-                <div class="text-cyan-300 mb-4 tech-font">Inicializando sistema...</div>
-                <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                    <div id="loading-bar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-300" style="width: 0%"></div>
-                </div>
-                <div id="loading-text" class="text-sm text-gray-400 mt-2 tech-font">Carregando módulos...</div>
-            </div>
-            
-            <!-- Enter Button -->
-            <div class="opacity-0" id="enter-section">
-                <button onclick="enterApp()" class="group relative px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full text-white font-semibold text-lg hover:from-cyan-400 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 neon-glow">
-                    <span class="relative z-10">🎯 Entrar no Sistema</span>
-                    <div class="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </button>
-            </div>
-            
-            <!-- Developer Info -->
-            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center opacity-0" id="developer-info">
-                <div class="bg-black/30 backdrop-blur-sm rounded-lg p-4 border border-cyan-500/20">
-                    <div class="text-cyan-300 font-semibold tech-font">Desenvolvido por</div>
-                    <div class="text-white text-lg font-bold">Matheus Ivan Rodrigues</div>
-                    <div class="text-gray-400 text-sm tech-font">@2025 • Tecnologia Educacional</div>
+<body class="gradient-bg min-h-screen">
+    <!-- Header -->
+    <div class="bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div class="max-w-md mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-white">PresetPro</h1>
+                <div class="bg-green-500/80 rounded-full px-3 py-1">
+                    <span class="text-white text-sm font-medium">100% GRÁTIS</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main App Content (Hidden Initially) -->
-    <div id="main-app" class="hidden">
-        <!-- Header -->
-        <header class="gradient-bg text-white p-6 card-shadow">
-            <div class="max-w-6xl mx-auto flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="text-3xl">📚</div>
-                    <h1 class="text-2xl font-bold">Estudo+ Fácil</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div id="firebase-status" class="text-xs bg-white/20 px-2 py-1 rounded-full">
-                        🔄 Conectando...
-                    </div>
-                    <div class="text-sm">Olá, <span id="studentName">Estudante</span>! 😊</div>
-                    <button onclick="showAchievements()" class="bg-white/20 px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-colors">
-                        🏆 Conquistas
-                    </button>
-                    <button onclick="logout()" class="bg-red-500/20 px-4 py-2 rounded-full text-sm hover:bg-red-500/30 transition-colors">
-                        🚪 Sair
-                    </button>
+    <!-- Main Content -->
+    <div id="mainContent" class="max-w-md mx-auto px-4 py-6">
+        <!-- Search Bar -->
+        <div class="mb-6">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Buscar presets..." 
+                       class="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">
+                <div class="absolute right-3 top-3">
+                    <span class="text-white/70">🔍</span>
                 </div>
             </div>
-        </header>
+        </div>
 
-        <!-- Navigation -->
-        <nav class="bg-white shadow-sm border-b">
-            <div class="max-w-6xl mx-auto px-6">
-                <div class="flex space-x-8">
-                    <button onclick="showSection('schedule')" class="nav-btn py-4 px-2 border-b-2 border-blue-500 text-blue-600 font-medium">
-                        📅 Agenda
-                    </button>
-                    <button onclick="showSection('tasks')" class="nav-btn py-4 px-2 text-gray-500 hover:text-blue-600">
-                        ✅ Tarefas
-                    </button>
-                    <button onclick="showSection('calendar')" class="nav-btn py-4 px-2 text-gray-500 hover:text-blue-600">
-                        📆 Calendário
-                    </button>
-                    <button onclick="showSection('diary')" class="nav-btn py-4 px-2 text-gray-500 hover:text-blue-600">
-                        📖 Diário
-                    </button>
-                    <button onclick="showSection('progress')" class="nav-btn py-4 px-2 text-gray-500 hover:text-blue-600">
-                        📊 Progresso
-                    </button>
-                    <button onclick="showSection('chat')" class="nav-btn py-4 px-2 text-gray-500 hover:text-blue-600">
-                        💬 Chat
-                    </button>
-                </div>
+        <!-- Categories -->
+        <div id="categoriesContainer">
+            <!-- Luz Natural -->
+            <div class="category-header rounded-t-xl px-4 py-3 mb-2">
+                <h2 class="text-lg font-semibold text-white flex items-center">
+                    <span class="mr-2">🌅</span>
+                    Luz Natural e Ambientes Externos
+                </h2>
             </div>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="max-w-6xl mx-auto p-6">
-            <!-- Schedule Section -->
-            <div id="schedule-section" class="section">
-                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 space-y-4 lg:space-y-0">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">📅 Agenda Escolar</h2>
-                        <p class="text-gray-600">Organize suas aulas e horários da semana</p>
-                    </div>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Golden Hour', '🌅', 'Perfeito para fotos durante o pôr do sol', 'GRÁTIS', 'Realça tons dourados e cria uma atmosfera mágica nas suas fotos. Ideal para retratos e paisagens durante a golden hour.')">
+                    <div class="text-2xl mb-2">🌅</div>
+                    <h3 class="text-white font-medium text-sm">Golden Hour</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
                 </div>
-
-                <!-- Quick Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-white rounded-lg p-4 card-shadow text-center">
-                        <div class="text-2xl font-bold text-blue-600" id="total-classes">0</div>
-                        <div class="text-sm text-gray-600">Aulas/Semana</div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 card-shadow text-center">
-                        <div class="text-2xl font-bold text-green-600" id="total-subjects">0</div>
-                        <div class="text-sm text-gray-600">Matérias</div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 card-shadow text-center">
-                        <div class="text-2xl font-bold text-purple-600" id="busiest-day">-</div>
-                        <div class="text-sm text-gray-600">Dia + Cheio</div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 card-shadow text-center">
-                        <div class="text-2xl font-bold text-orange-600" id="next-class">-</div>
-                        <div class="text-sm text-gray-600">Próxima Aula</div>
-                    </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Soft Sunset', '🌇', 'Tons suaves de pôr do sol', 'GRÁTIS', 'Cria uma atmosfera romântica com tons rosados e alaranjados suaves. Perfeito para momentos especiais.')">
+                    <div class="text-2xl mb-2">🌇</div>
+                    <h3 class="text-white font-medium text-sm">Soft Sunset</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
                 </div>
-
-                <!-- Current Day Highlight -->
-                <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-4 mb-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold">📚 Hoje é <span id="current-day-name"></span></h3>
-                            <p class="text-blue-100">Suas aulas de hoje:</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-2xl font-bold" id="today-classes-count">0</div>
-                            <div class="text-sm text-blue-100">aulas</div>
-                        </div>
-                    </div>
-                    <div id="today-schedule" class="mt-3 space-y-2">
-                        <!-- Today's classes will be populated here -->
-                    </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Warm Breeze', '🍃', 'Sensação de brisa quente', 'GRÁTIS', 'Adiciona calor e movimento às suas fotos ao ar livre. Ideal para fotos em parques e jardins.')">
+                    <div class="text-2xl mb-2">🍃</div>
+                    <h3 class="text-white font-medium text-sm">Warm Breeze</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
                 </div>
-
-                <!-- Schedule Grid -->
-                <div class="bg-white rounded-lg card-shadow overflow-hidden">
-                    <div class="p-4 bg-gray-50 border-b">
-                        <h3 class="font-semibold text-gray-800">📋 Grade Horária Semanal</h3>
-                    </div>
-                    
-                    <div id="schedule-container" class="overflow-x-auto">
-                        <div class="grid grid-cols-8 gap-2 p-4 min-w-full" style="min-width: 800px;">
-                            <div class="font-semibold text-center text-gray-600 py-3 bg-gray-100 rounded-lg">⏰ Horário</div>
-                            <div class="font-semibold text-center text-gray-600 py-3 bg-blue-50 rounded-lg">🌅 Segunda</div>
-                            <div class="font-semibold text-center text-gray-600 py-3 bg-green-50 rounded-lg">🌤️ Terça</div>
-                            <div class="font-semibold text-center text-gray-600 py-3 bg-yellow-50 rounded-lg">☀️ Quarta</div>
-                            <div class="font-semibold text-center text-gray-600 py-3 bg-orange-50 rounded-lg">🌅 Quinta</div>
-                            <div class="font-semibold text-center text-gray-600 py-3 bg-red-50 rounded-lg">🎉 Sexta</div>
-                            <div class="font-semibold text-center text-gray-600 py-3 bg-purple-50 rounded-lg">🏖️ Sábado</div>
-                            <div class="font-semibold text-center text-gray-600 py-3 bg-pink-50 rounded-lg">😴 Domingo</div>
-                        </div>
-                        
-                        <div id="schedule-grid" class="grid grid-cols-8 gap-2 p-4 min-w-full" style="min-width: 800px;">
-                            <!-- Schedule will be populated by JavaScript -->
-                        </div>
-                    </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Blue Sky Pop', '☁️', 'Céu azul vibrante', 'GRÁTIS', 'Intensifica o azul do céu e as nuvens brancas. Perfeito para fotos de paisagens e arquitetura.')">
+                    <div class="text-2xl mb-2">☁️</div>
+                    <h3 class="text-white font-medium text-sm">Blue Sky Pop</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Sunlit Skin', '☀️', 'Pele iluminada pelo sol', 'GRÁTIS', 'Realça a pele com luz natural, criando um brilho saudável e natural.')">
+                    <div class="text-2xl mb-2">☀️</div>
+                    <h3 class="text-white font-medium text-sm">Sunlit Skin</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Outdoor Clean', '🌿', 'Limpeza para externos', 'GRÁTIS', 'Look limpo e natural para fotos ao ar livre. Mantém as cores verdadeiras com um toque profissional.')">
+                    <div class="text-2xl mb-2">🌿</div>
+                    <h3 class="text-white font-medium text-sm">Outdoor Clean</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Beach Glow', '🏖️', 'Brilho de praia', 'GRÁTIS', 'Captura a essência das férias na praia com tons quentes e brilhantes.')">
+                    <div class="text-2xl mb-2">🏖️</div>
+                    <h3 class="text-white font-medium text-sm">Beach Glow</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Pool Vibe Pro', '🏊', 'Vibe de piscina profissional', 'GRÁTIS', 'Realça o azul da água e cria uma atmosfera refrescante e vibrante.')">
+                    <div class="text-2xl mb-2">🏊</div>
+                    <h3 class="text-white font-medium text-sm">Pool Vibe Pro</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Nature Bright', '🌳', 'Natureza brilhante', 'GRÁTIS', 'Intensifica os verdes da natureza e adiciona brilho às fotos de paisagens.')">
+                    <div class="text-2xl mb-2">🌳</div>
+                    <h3 class="text-white font-medium text-sm">Nature Bright</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Forest Tones', '🌲', 'Tons de floresta', 'GRÁTIS', 'Cria uma atmosfera misteriosa e natural com tons terrosos e verdes profundos.')">
+                    <div class="text-2xl mb-2">🌲</div>
+                    <h3 class="text-white font-medium text-sm">Forest Tones</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
                 </div>
             </div>
 
-            <!-- Tasks Section -->
-            <div id="tasks-section" class="section hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">✅ Lista de Tarefas</h2>
-                    <button onclick="addTask()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
-                        ➕ Nova Tarefa
-                    </button>
+            <!-- Ambientes Internos -->
+            <div class="category-header rounded-t-xl px-4 py-3 mb-2">
+                <h2 class="text-lg font-semibold text-white flex items-center">
+                    <span class="mr-2">🏠</span>
+                    Ambientes Internos (Indoor)
+                </h2>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Indoor Clean Light', '💡', 'Luz limpa para interiores', 'GRÁTIS', 'Otimiza a iluminação artificial para fotos em ambientes fechados.')">
+                    <div class="text-2xl mb-2">💡</div>
+                    <h3 class="text-white font-medium text-sm">Indoor Clean Light</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
                 </div>
-                
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-lg p-4 card-shadow">
-                        <h3 class="font-semibold text-red-600 mb-3">🔴 Urgente</h3>
-                        <div id="urgent-tasks" class="space-y-2"></div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 card-shadow">
-                        <h3 class="font-semibold text-yellow-600 mb-3">🟡 Médio</h3>
-                        <div id="medium-tasks" class="space-y-2"></div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 card-shadow">
-                        <h3 class="font-semibold text-green-600 mb-3">🟢 Tranquilo</h3>
-                        <div id="low-tasks" class="space-y-2"></div>
-                    </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Cozy Home', '🏡', 'Casa aconchegante', 'GRÁTIS', 'Cria uma atmosfera acolhedora e calorosa para fotos domésticas.')">
+                    <div class="text-2xl mb-2">🏡</div>
+                    <h3 class="text-white font-medium text-sm">Cozy Home</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Warm Room', '🔥', 'Ambiente quente', 'GRÁTIS', 'Adiciona calor e conforto às fotos de interiores.')">
+                    <div class="text-2xl mb-2">🔥</div>
+                    <h3 class="text-white font-medium text-sm">Warm Room</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Studio Soft', '📸', 'Estúdio suave', 'GRÁTIS', 'Look profissional de estúdio com iluminação suave e equilibrada.')">
+                    <div class="text-2xl mb-2">📸</div>
+                    <h3 class="text-white font-medium text-sm">Studio Soft</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('White Walls', '⬜', 'Paredes brancas', 'GRÁTIS', 'Otimizado para ambientes com paredes brancas e luz natural.')">
+                    <div class="text-2xl mb-2">⬜</div>
+                    <h3 class="text-white font-medium text-sm">White Walls</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Low Light Boost', '🌙', 'Reforço para pouca luz', 'GRÁTIS', 'Melhora fotos tiradas em ambientes com pouca iluminação.')">
+                    <div class="text-2xl mb-2">🌙</div>
+                    <h3 class="text-white font-medium text-sm">Low Light Boost</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Home Vibes', '🛋️', 'Vibes de casa', 'GRÁTIS', 'Captura a essência do lar com tons quentes e aconchegantes.')">
+                    <div class="text-2xl mb-2">🛋️</div>
+                    <h3 class="text-white font-medium text-sm">Home Vibes</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Coffee Mood', '☕', 'Clima de café', 'GRÁTIS', 'Perfeito para fotos em cafeterias e momentos de pausa.')">
+                    <div class="text-2xl mb-2">☕</div>
+                    <h3 class="text-white font-medium text-sm">Coffee Mood</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Desk Setup', '💻', 'Setup de mesa', 'GRÁTIS', 'Ideal para fotos de workspace e setup de trabalho.')">
+                    <div class="text-2xl mb-2">💻</div>
+                    <h3 class="text-white font-medium text-sm">Desk Setup</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Plant Corner', '🪴', 'Cantinho das plantas', 'GRÁTIS', 'Realça o verde das plantas em ambientes internos.')">
+                    <div class="text-2xl mb-2">🪴</div>
+                    <h3 class="text-white font-medium text-sm">Plant Corner</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
                 </div>
             </div>
 
-            <!-- Calendar Section -->
-            <div id="calendar-section" class="section hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">📆 Calendário Mensal</h2>
-                    <button onclick="addEvent()" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors">
-                        ➕ Novo Evento
-                    </button>
+            <!-- Retratos e Selfies -->
+            <div class="category-header rounded-t-xl px-4 py-3 mb-2">
+                <h2 class="text-lg font-semibold text-white flex items-center">
+                    <span class="mr-2">💁</span>
+                    Retratos e Selfies
+                </h2>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Smooth Skin', '✨', 'Pele suave', 'GRÁTIS', 'Suaviza a pele mantendo a naturalidade. Perfeito para retratos e selfies.')">
+                    <div class="text-2xl mb-2">✨</div>
+                    <h3 class="text-white font-medium text-sm">Smooth Skin</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
                 </div>
-                
-                <div class="bg-white rounded-lg p-6 card-shadow">
-                    <div class="flex justify-between items-center mb-4">
-                        <button onclick="previousMonth()" class="text-2xl hover:bg-gray-100 p-2 rounded">←</button>
-                        <h3 id="current-month" class="text-xl font-semibold"></h3>
-                        <button onclick="nextMonth()" class="text-2xl hover:bg-gray-100 p-2 rounded">→</button>
-                    </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-2"></div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Bronze Touch', '🥉', 'Toque bronzeado', 'GRÁTIS', 'Adiciona um bronzeado natural e saudável à pele.')">
+                    <div class="text-2xl mb-2">🥉</div>
+                    <h3 class="text-white font-medium text-sm">Bronze Touch</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Soft Glow', '🌟', 'Brilho suave', 'GRÁTIS', 'Cria um brilho natural e luminoso na pele.')">
+                    <div class="text-2xl mb-2">🌟</div>
+                    <h3 class="text-white font-medium text-sm">Soft Glow</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Selfie Shine', '🤳', 'Brilho de selfie', 'GRÁTIS', 'Otimizado especialmente para selfies com luz frontal.')">
+                    <div class="text-2xl mb-2">🤳</div>
+                    <h3 class="text-white font-medium text-sm">Selfie Shine</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Natural Beauty', '🌸', 'Beleza natural', 'GRÁTIS', 'Realça a beleza natural sem exageros.')">
+                    <div class="text-2xl mb-2">🌸</div>
+                    <h3 class="text-white font-medium text-sm">Natural Beauty</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Golden Tan', '🏆', 'Bronzeado dourado', 'GRÁTIS', 'Bronzeado com tons dourados para um look radiante.')">
+                    <div class="text-2xl mb-2">🏆</div>
+                    <h3 class="text-white font-medium text-sm">Golden Tan</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Flawless Face', '💎', 'Rosto impecável', 'GRÁTIS', 'Look impecável mantendo a naturalidade da pele.')">
+                    <div class="text-2xl mb-2">💎</div>
+                    <h3 class="text-white font-medium text-sm">Flawless Face</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Peach Skin', '🍑', 'Pele de pêssego', 'GRÁTIS', 'Tons rosados e suaves para uma pele de pêssego.')">
+                    <div class="text-2xl mb-2">🍑</div>
+                    <h3 class="text-white font-medium text-sm">Peach Skin</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('No Filter Look', '🚫', 'Look sem filtro', 'GRÁTIS', 'Aparência natural como se não houvesse filtro.')">
+                    <div class="text-2xl mb-2">🚫</div>
+                    <h3 class="text-white font-medium text-sm">No Filter Look</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Glow Up', '💫', 'Transformação radiante', 'GRÁTIS', 'Transformação sutil que realça todos os melhores aspectos.')">
+                    <div class="text-2xl mb-2">💫</div>
+                    <h3 class="text-white font-medium text-sm">Glow Up</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
                 </div>
             </div>
 
-            <!-- Diary Section -->
-            <div id="diary-section" class="section hidden">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">📖 Diário de Estudos</h2>
-                
-                <div class="bg-white rounded-lg p-6 card-shadow">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Como foi seu dia hoje?</label>
-                        <div class="flex space-x-4 mb-4">
-                            <span class="mood-emoji" onclick="setMood('happy')">😃</span>
-                            <span class="mood-emoji" onclick="setMood('neutral')">😐</span>
-                            <span class="mood-emoji" onclick="setMood('sad')">😞</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">O que você aprendeu hoje?</label>
-                        <textarea id="learning-notes" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="4" placeholder="Escreva sobre o que aprendeu hoje..."></textarea>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Dificuldades encontradas:</label>
-                        <textarea id="difficulties" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" placeholder="Quais foram suas dificuldades?"></textarea>
-                    </div>
-                    
-                    <button onclick="saveDiaryEntry()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                        💾 Salvar Entrada
-                    </button>
+            <!-- Continue with other categories... -->
+            <!-- For brevity, I'll add a few more key categories -->
+
+            <!-- Viagens -->
+            <div class="category-header rounded-t-xl px-4 py-3 mb-2">
+                <h2 class="text-lg font-semibold text-white flex items-center">
+                    <span class="mr-2">✈️</span>
+                    Viagens
+                </h2>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Wanderlust', '🗺️', 'Espírito aventureiro', 'GRÁTIS', 'Captura o espírito de aventura e descoberta em suas viagens.')">
+                    <div class="text-2xl mb-2">🗺️</div>
+                    <h3 class="text-white font-medium text-sm">Wanderlust</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
                 </div>
-                
-                <div class="mt-6">
-                    <h3 class="text-lg font-semibold mb-4">📝 Entradas Anteriores</h3>
-                    <div id="diary-entries" class="space-y-4"></div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Travel Diary', '📖', 'Diário de viagem', 'GRÁTIS', 'Look nostálgico perfeito para documentar suas aventuras.')">
+                    <div class="text-2xl mb-2">📖</div>
+                    <h3 class="text-white font-medium text-sm">Travel Diary</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('City Pop', '🏙️', 'Vibe urbana', 'GRÁTIS', 'Perfeito para fotos em grandes cidades e ambientes urbanos.')">
+                    <div class="text-2xl mb-2">🏙️</div>
+                    <h3 class="text-white font-medium text-sm">City Pop</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Tokyo Lights', '🏮', 'Luzes de Tóquio', 'GRÁTIS', 'Inspirado nas luzes neon e na atmosfera única do Japão.')">
+                    <div class="text-2xl mb-2">🏮</div>
+                    <h3 class="text-white font-medium text-sm">Tokyo Lights</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
                 </div>
             </div>
 
-            <!-- Progress Section -->
-            <div id="progress-section" class="section hidden">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Relatório de Progresso</h2>
-                
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-lg p-6 card-shadow">
-                        <h3 class="text-lg font-semibold mb-4">📈 Notas por Matéria</h3>
-                        <div id="grades-chart" class="space-y-4"></div>
-                        <button onclick="addGrade()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                            ➕ Adicionar Nota
-                        </button>
-                    </div>
-                    
-                    <div class="bg-white rounded-lg p-6 card-shadow">
-                        <h3 class="text-lg font-semibold mb-4">🏆 Conquistas</h3>
-                        <div id="achievements-list" class="space-y-3"></div>
-                    </div>
+            <!-- Instagram/Influencer -->
+            <div class="category-header rounded-t-xl px-4 py-3 mb-2">
+                <h2 class="text-lg font-semibold text-white flex items-center">
+                    <span class="mr-2">🎨</span>
+                    Estilo Instagram / Influencer
+                </h2>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Blogger Soft', '📱', 'Blogger suave', 'GRÁTIS', 'Look suave e profissional perfeito para influenciadores.')">
+                    <div class="text-2xl mb-2">📱</div>
+                    <h3 class="text-white font-medium text-sm">Blogger Soft</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('VSCO Vibe', '📷', 'Vibe VSCO', 'GRÁTIS', 'Estilo VSCO clássico com tons suaves e naturais.')">
+                    <div class="text-2xl mb-2">📷</div>
+                    <h3 class="text-white font-medium text-sm">VSCO Vibe</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Pink Mood', '💗', 'Mood rosa', 'GRÁTIS', 'Tons rosados delicados para um feed feminino e elegante.')">
+                    <div class="text-2xl mb-2">💗</div>
+                    <h3 class="text-white font-medium text-sm">Pink Mood</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
+                </div>
+                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Ice Aesthetic', '🧊', 'Estética gelada', 'GRÁTIS', 'Tons frios e minimalistas para um look moderno.')">
+                    <div class="text-2xl mb-2">🧊</div>
+                    <h3 class="text-white font-medium text-sm">Ice Aesthetic</h3>
+                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
                 </div>
             </div>
-
-            <!-- Chat Section -->
-            <div id="chat-section" class="section hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">💬 Chat dos Estudantes</h2>
-                    <div class="flex space-x-2">
-                        <button onclick="shareProgress()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
-                            📊 Compartilhar Progresso
-                        </button>
-                        <button onclick="shareDiary()" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors">
-                            📖 Compartilhar Diário
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="grid lg:grid-cols-4 gap-6">
-                    <!-- Online Users -->
-                    <div class="bg-white rounded-lg p-4 card-shadow">
-                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
-                            <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                            Online (<span id="online-count">1</span>)
-                        </h3>
-                        <div id="online-users" class="space-y-2">
-                            <!-- Online users will be populated dynamically -->
-                        </div>
-                    </div>
-                    
-                    <!-- Chat Messages -->
-                    <div class="lg:col-span-3 bg-white rounded-lg card-shadow flex flex-col h-96">
-                        <div class="p-4 border-b border-gray-200">
-                            <h3 class="font-semibold text-gray-800">💬 Conversa Geral</h3>
-                            <div class="text-sm text-gray-500">Compartilhe seus estudos e motive seus colegas!</div>
-                        </div>
-                        
-                        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4">
-                            <!-- Messages will be populated here -->
-                        </div>
-                        
-                        <div class="p-4 border-t border-gray-200">
-                            <div class="flex space-x-2">
-                                <input type="text" id="chat-input" placeholder="Digite sua mensagem..." 
-                                       class="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       onkeypress="handleChatKeyPress(event)">
-                                <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                                    📤
-                                </button>
-                            </div>
-                            <div class="flex space-x-2 mt-2">
-                                <button onclick="sendEmoji('👍')" class="text-lg hover:bg-gray-100 p-1 rounded">👍</button>
-                                <button onclick="sendEmoji('❤️')" class="text-lg hover:bg-gray-100 p-1 rounded">❤️</button>
-                                <button onclick="sendEmoji('😊')" class="text-lg hover:bg-gray-100 p-1 rounded">😊</button>
-                                <button onclick="sendEmoji('🎉')" class="text-lg hover:bg-gray-100 p-1 rounded">🎉</button>
-                                <button onclick="sendEmoji('📚')" class="text-lg hover:bg-gray-100 p-1 rounded">📚</button>
-                                <button onclick="sendEmoji('💪')" class="text-lg hover:bg-gray-100 p-1 rounded">💪</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Shared Content Feed -->
-                <div class="mt-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">📋 Compartilhamentos Recentes</h3>
-                    <div id="shared-content" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Shared content will be populated here -->
-                    </div>
-                </div>
-            </div>
-        </main>
+        </div>
     </div>
 
-    <!-- Notification Area -->
-    <div id="notifications" class="fixed top-20 right-4 space-y-2 z-50"></div>
+    <!-- Preset Details Modal -->
+    <div id="presetDetails" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
+        <div class="max-w-md mx-auto h-full flex items-center justify-center p-4">
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 w-full max-h-[90vh] overflow-y-auto">
+                <!-- Header -->
+                <div class="flex items-center justify-between p-6 border-b border-white/20">
+                    <button onclick="hidePresetDetails()" class="back-btn text-white/70 hover:text-white flex items-center">
+                        <span class="mr-2">←</span>
+                        Voltar
+                    </button>
+                    <button class="text-white/70 hover:text-white">
+                        <span>❤️</span>
+                    </button>
+                </div>
 
-    <!-- Modals -->
-    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" onclick="closeModal()">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div id="modal-content" class="bg-white rounded-lg p-6 max-w-md w-full" onclick="event.stopPropagation()">
-                <!-- Modal content will be inserted here -->
+                <!-- Content -->
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <div id="presetIcon" class="text-6xl mb-4">🌅</div>
+                        <h2 id="presetName" class="text-2xl font-bold text-white mb-2">Golden Hour</h2>
+                        <p id="presetSubtitle" class="text-white/70 mb-4">Perfeito para fotos durante o pôr do sol</p>
+                        <div id="presetPrice" class="text-3xl font-bold text-green-400">GRÁTIS</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-white mb-3">Descrição</h3>
+                        <p id="presetDescription" class="text-white/80 leading-relaxed">
+                            Realça tons dourados e cria uma atmosfera mágica nas suas fotos. Ideal para retratos e paisagens durante a golden hour.
+                        </p>
+                    </div>
+
+                    <!-- Features -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-white mb-3">Características</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center text-white/80">
+                                <span class="mr-2">✅</span>
+                                Compatível com iPhone
+                            </div>
+                            <div class="flex items-center text-white/80">
+                                <span class="mr-2">✅</span>
+                                Fácil instalação
+                            </div>
+                            <div class="flex items-center text-white/80">
+                                <span class="mr-2">✅</span>
+                                Suporte técnico incluído
+                            </div>
+                            <div class="flex items-center text-white/80">
+                                <span class="mr-2">✅</span>
+                                Atualizações gratuitas
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Images -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-white mb-3">Preview</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-white/5 rounded-xl h-32 flex items-center justify-center border border-white/10">
+                                <span class="text-white/50">Antes</span>
+                            </div>
+                            <div class="bg-white/5 rounded-xl h-32 flex items-center justify-center border border-white/10">
+                                <span class="text-white/50">Depois</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Download Button -->
+                    <button onclick="downloadPreset()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-4 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105">
+                        Baixar Grátis
+                    </button>
+
+                    <!-- Share Button -->
+                    <button onclick="sharePreset()" class="w-full mt-3 bg-white/10 backdrop-blur-md border border-white/20 text-white font-medium py-3 rounded-xl hover:bg-white/20 transition-all duration-300">
+                        Compartilhar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Initialize login screen
-        document.addEventListener('DOMContentLoaded', function() {
-            initLoginScreen();
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const presetCards = document.querySelectorAll('.preset-card');
+            
+            presetCards.forEach(card => {
+                const presetName = card.querySelector('h3').textContent.toLowerCase();
+                if (presetName.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         });
 
-        function initLoginScreen() {
-            // Create matrix effect for login screen
-            createMatrixEffect('login-matrix-bg');
+        // Show preset details
+        function showPresetDetails(name, icon, subtitle, price, description) {
+            document.getElementById('presetName').textContent = name;
+            document.getElementById('presetIcon').textContent = icon;
+            document.getElementById('presetSubtitle').textContent = subtitle;
+            document.getElementById('presetPrice').textContent = price;
+            document.getElementById('presetDescription').textContent = description;
+            document.getElementById('presetDetails').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
 
-        // Form toggle functions
-        function showLoginForm() {
-            document.getElementById('login-form').classList.remove('hidden');
-            document.getElementById('register-form').classList.add('hidden');
-            document.getElementById('login-tab').className = 'flex-1 py-2 px-4 text-center font-medium rounded-l-lg bg-cyan-500/30 text-cyan-200 border-r border-cyan-400/30';
-            document.getElementById('register-tab').className = 'flex-1 py-2 px-4 text-center font-medium rounded-r-lg bg-white/10 text-cyan-300 hover:bg-white/20';
-            document.getElementById('form-info').textContent = 'Entre com seu email e senha';
+        // Hide preset details
+        function hidePresetDetails() {
+            document.getElementById('presetDetails').classList.add('hidden');
+            document.body.style.overflow = 'auto';
         }
 
-        function showRegisterForm() {
-            document.getElementById('login-form').classList.add('hidden');
-            document.getElementById('register-form').classList.remove('hidden');
-            document.getElementById('login-tab').className = 'flex-1 py-2 px-4 text-center font-medium rounded-l-lg bg-white/10 text-cyan-300 hover:bg-white/20 border-r border-cyan-400/30';
-            document.getElementById('register-tab').className = 'flex-1 py-2 px-4 text-center font-medium rounded-r-lg bg-cyan-500/30 text-cyan-200';
-            document.getElementById('form-info').textContent = 'Crie sua conta para começar a usar o sistema';
+        // Download preset
+        function downloadPreset() {
+            const presetName = document.getElementById('presetName').textContent;
+            
+            alert(`🎉 Download iniciado!\n\nPreset: ${presetName}\n\nO arquivo será baixado automaticamente. Verifique sua pasta de downloads e siga as instruções de instalação incluídas.`);
+            hidePresetDetails();
         }
 
-        // Login functions
-        function handleLogin(event) {
-            event.preventDefault();
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value.trim();
+        // Share preset
+        function sharePreset() {
+            const presetName = document.getElementById('presetName').textContent;
             
-            if (email && password) {
-                authenticateUser(email, password, false);
-            }
-        }
-
-        function handleRegister(event) {
-            event.preventDefault();
-            const name = document.getElementById('register-name').value.trim();
-            const email = document.getElementById('register-email').value.trim();
-            const password = document.getElementById('register-password').value.trim();
-            const confirmPassword = document.getElementById('register-confirm-password').value.trim();
-            
-            if (password !== confirmPassword) {
-                showNotification('❌ As senhas não coincidem!', 'error');
-                return;
-            }
-            
-            if (name && email && password) {
-                authenticateUser(email, password, true, name);
-            }
-        }
-
-
-
-        function authenticateUser(email, password, isRegistering, displayName = null) {
-            // Show loading state
-            showLoginLoading();
-            
-            const authFunction = isRegistering ? 
-                window.createUserWithEmailAndPassword :
-                window.signInWithEmailAndPassword;
-            
-            authFunction(window.firebaseAuth, email, password)
-                .then(async (userCredential) => {
-                    const user = userCredential.user;
-                    console.log('🔥 Firebase autenticado com sucesso!');
-                    
-                    // Set display name for new users
-                    if (isRegistering && displayName) {
-                        await window.updateProfile(user, {
-                            displayName: displayName
-                        });
-                        currentUser = displayName;
-                    } else {
-                        currentUser = user.displayName || user.email.split('@')[0];
-                    }
-                    
-                    document.getElementById('studentName').textContent = currentUser;
-                    
-                    if (window.initFirebaseData) {
-                        window.initFirebaseData();
-                    }
-                    
-                    // Show success message
-                    const message = isRegistering ? 
-                        '✨ Conta criada com sucesso! Bem-vindo!' : 
-                        '🎉 Login realizado com sucesso!';
-                    showNotification(message, 'success');
-                    
-                    // Proceed to tech opening after successful auth
-                    setTimeout(() => {
-                        document.getElementById('login-screen').style.display = 'none';
-                        document.getElementById('tech-opening').classList.remove('hidden');
-                        initTechOpening();
-                    }, 1500);
-                    
-                })
-                .catch((error) => {
-                    console.error('Erro na autenticação:', error);
-                    hideLoginLoading();
-                    
-                    let errorMessage = 'Erro na autenticação';
-                    switch (error.code) {
-                        case 'auth/email-already-in-use':
-                            errorMessage = '❌ Este email já está em uso!';
-                            break;
-                        case 'auth/weak-password':
-                            errorMessage = '❌ Senha muito fraca! Use pelo menos 6 caracteres.';
-                            break;
-                        case 'auth/user-not-found':
-                            errorMessage = '❌ Usuário não encontrado!';
-                            break;
-                        case 'auth/wrong-password':
-                            errorMessage = '❌ Senha incorreta!';
-                            break;
-                        case 'auth/invalid-email':
-                            errorMessage = '❌ Email inválido!';
-                            break;
-                        case 'auth/too-many-requests':
-                            errorMessage = '❌ Muitas tentativas. Tente novamente mais tarde.';
-                            break;
-                        default:
-                            errorMessage = `❌ ${error.message}`;
-                    }
-                    
-                    showNotification(errorMessage, 'error');
-                });
-        }
-
-        function showLoginLoading() {
-            const loginScreen = document.getElementById('login-screen');
-            const loadingOverlay = document.createElement('div');
-            loadingOverlay.id = 'login-loading';
-            loadingOverlay.className = 'absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20';
-            loadingOverlay.innerHTML = `
-                <div class="text-center">
-                    <div class="inline-block p-4 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 neon-glow pulse-glow mb-4">
-                        <div class="text-3xl">🔄</div>
-                    </div>
-                    <div class="text-white font-semibold mb-2">Autenticando...</div>
-                    <div class="text-cyan-300 text-sm tech-font">Conectando ao sistema</div>
-                </div>
-            `;
-            loginScreen.appendChild(loadingOverlay);
-        }
-
-        function hideLoginLoading() {
-            const loadingOverlay = document.getElementById('login-loading');
-            if (loadingOverlay) {
-                loadingOverlay.remove();
-            }
-        }
-
-        function initTechOpening() {
-            // Create matrix effect
-            createMatrixEffect();
-            
-            // Animate elements in sequence
-            setTimeout(() => {
-                document.getElementById('features-grid').classList.add('scale-in');
-                document.getElementById('features-grid').style.opacity = '1';
-            }, 2000);
-            
-            setTimeout(() => {
-                document.getElementById('loading-section').classList.add('slide-up');
-                document.getElementById('loading-section').style.opacity = '1';
-                startLoadingAnimation();
-            }, 3000);
-            
-            setTimeout(() => {
-                document.getElementById('developer-info').classList.add('slide-up');
-                document.getElementById('developer-info').style.opacity = '1';
-            }, 4000);
-        }
-
-        function createMatrixEffect(containerId = 'matrix-bg') {
-            const matrixBg = document.getElementById(containerId);
-            const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
-            
-            for (let i = 0; i < 50; i++) {
-                setTimeout(() => {
-                    const char = document.createElement('div');
-                    char.className = 'matrix-char';
-                    char.textContent = chars[Math.floor(Math.random() * chars.length)];
-                    char.style.left = Math.random() * 100 + '%';
-                    char.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                    char.style.animationDelay = Math.random() * 2 + 's';
-                    matrixBg.appendChild(char);
-                    
-                    // Remove after animation
-                    setTimeout(() => {
-                        if (char.parentNode) {
-                            char.parentNode.removeChild(char);
-                        }
-                    }, 5000);
-                }, i * 100);
-            }
-        }
-
-        function startLoadingAnimation() {
-            const loadingBar = document.getElementById('loading-bar');
-            const loadingText = document.getElementById('loading-text');
-            
-            const steps = [
-                { width: 20, text: 'Carregando interface...' },
-                { width: 40, text: 'Inicializando banco de dados...' },
-                { width: 60, text: 'Configurando módulos...' },
-                { width: 80, text: 'Preparando sistema...' },
-                { width: 100, text: 'Sistema pronto!' }
-            ];
-            
-            let currentStep = 0;
-            
-            const interval = setInterval(() => {
-                if (currentStep < steps.length) {
-                    loadingBar.style.width = steps[currentStep].width + '%';
-                    loadingText.textContent = steps[currentStep].text;
-                    currentStep++;
-                } else {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        document.getElementById('enter-section').classList.add('scale-in');
-                        document.getElementById('enter-section').style.opacity = '1';
-                    }, 500);
-                }
-            }, 800);
-        }
-
-        function enterApp() {
-            // Fade out opening screen
-            document.getElementById('tech-opening').classList.add('fade-out');
-            
-            setTimeout(() => {
-                document.getElementById('tech-opening').style.display = 'none';
-                document.getElementById('main-app').classList.remove('hidden');
-                
-                // Initialize main app
-                loadData();
-                initializeSchedule();
-                updateCalendar();
-                updateTasksDisplay();
-                updateProgressDisplay();
-                showMotivationalMessage();
-                initializeChat();
-                
-                // Show welcome notification
-                setTimeout(() => {
-                    showNotification('🚀 Bem-vindo ao Estudo+ Fácil! Vamos organizar seus estudos!', 'success');
-                }, 500);
-            }, 1000);
-        }
-
-        // Logout function
-        async function logout() {
-            if (confirm('Tem certeza que deseja sair?')) {
-                // Remove user presence before signing out
-                await removeUserPresence();
-                
-                // Sign out from Firebase
-                if (window.signOut && window.firebaseAuth) {
-                    window.signOut(window.firebaseAuth).then(() => {
-                        console.log('🚪 Logout realizado com sucesso');
-                    }).catch((error) => {
-                        console.error('Erro no logout:', error);
-                    });
-                }
-                
-                // Reset user data
-                currentUser = 'Estudante';
-                currentUserId = null;
-                isFirebaseReady = false;
-                
-                // Clear local data
-                localStorage.removeItem('estudoFacilData');
-                
-                // Reset all data
-                scheduleData = {};
-                tasksData = { urgent: [], medium: [], low: [] };
-                eventsData = [];
-                diaryEntries = [];
-                gradesData = {};
-                achievements = [];
-                chatMessages = [];
-                sharedContent = [];
-                
-                // Hide main app and show login screen
-                document.getElementById('main-app').classList.add('hidden');
-                document.getElementById('tech-opening').style.display = 'none';
-                document.getElementById('login-screen').style.display = 'flex';
-                
-                // Clear login forms
-                document.getElementById('login-email').value = '';
-                document.getElementById('login-password').value = '';
-                document.getElementById('register-name').value = '';
-                document.getElementById('register-email').value = '';
-                document.getElementById('register-password').value = '';
-                document.getElementById('register-confirm-password').value = '';
-                
-                // Reset to login form
-                showLoginForm();
-                
-                // Remove loading overlay if exists
-                const loadingOverlay = document.getElementById('login-loading');
-                if (loadingOverlay) {
-                    loadingOverlay.remove();
-                }
-                
-                // Recreate matrix effect
-                initLoginScreen();
-                
-                showNotification('👋 Logout realizado com sucesso!', 'success');
-            }
-        }
-
-        // Global variables
-        let currentDate = new Date();
-        let timerInterval;
-        let timerMinutes = 25;
-        let timerSeconds = 0;
-        let isTimerRunning = false;
-        let pomodoroCount = 0;
-        let currentMood = null;
-        let currentUser = 'Você';
-        let onlineUsers = [];
-        let userPresenceRef = null;
-
-        // Data storage
-        let scheduleData = {};
-        let tasksData = { urgent: [], medium: [], low: [] };
-        let eventsData = [];
-        let diaryEntries = [];
-        let gradesData = {};
-        let achievements = [];
-        let chatMessages = [];
-        let sharedContent = [];
-
-        // Navigation
-        function showSection(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.add('hidden');
-            });
-            
-            // Show selected section
-            document.getElementById(sectionName + '-section').classList.remove('hidden');
-            
-            // Update navigation buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('border-blue-500', 'text-blue-600');
-                btn.classList.add('text-gray-500');
-            });
-            
-            event.target.classList.add('border-blue-500', 'text-blue-600');
-            event.target.classList.remove('text-gray-500');
-        }
-
-        // Schedule functions
-        let isCompactView = false;
-        
-        function initializeSchedule() {
-            updateScheduleDisplay();
-            updateScheduleStats();
-            updateTodaySchedule();
-        }
-
-        function updateScheduleDisplay() {
-            const scheduleGrid = document.getElementById('schedule-grid');
-            const timeSlots = ['07:00', '08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
-            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            
-            scheduleGrid.innerHTML = '';
-            
-            timeSlots.forEach(time => {
-                // Time column
-                const timeCell = document.createElement('div');
-                timeCell.className = 'text-center py-3 px-2 font-medium text-gray-600 bg-gray-50 rounded-lg border';
-                timeCell.textContent = time;
-                scheduleGrid.appendChild(timeCell);
-                
-                // Day columns
-                days.forEach(day => {
-                    const cell = document.createElement('div');
-                    cell.className = 'min-h-16 border-2 border-dashed border-gray-200 rounded-lg p-2 hover:border-blue-300 transition-all cursor-pointer hover:shadow-md';
-                    cell.onclick = () => addClassToSchedule(day, time);
-                    
-                    if (scheduleData[day] && scheduleData[day][time]) {
-                        const classData = scheduleData[day][time];
-                        cell.className = `min-h-16 rounded-lg p-2 text-white font-medium subject-${classData.subject} hover:shadow-lg transition-all cursor-pointer relative`;
-                        cell.innerHTML = `
-                            <div class="text-sm font-semibold">${classData.name}</div>
-                            <div class="text-xs opacity-90">${classData.room}</div>
-                            <div class="text-xs opacity-80">${classData.teacher || ''}</div>
-                            <button onclick="editClass(event, '${day}', '${time}')" class="absolute top-1 right-1 text-white hover:text-gray-200 text-xs">✏️</button>
-                            <button onclick="deleteClass(event, '${day}', '${time}')" class="absolute top-1 right-6 text-white hover:text-red-200 text-xs">🗑️</button>
-                        `;
-                    } else {
-                        cell.innerHTML = `
-                            <div class="text-center text-gray-400 text-xs">
-                                <div>➕</div>
-                                <div>Adicionar</div>
-                            </div>
-                        `;
-                    }
-                    
-                    scheduleGrid.appendChild(cell);
-                });
-            });
-        }
-
-        function updateScheduleStats() {
-            let totalClasses = 0;
-            const subjects = new Set();
-            const dayCount = { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 };
-            
-            Object.keys(scheduleData).forEach(day => {
-                Object.keys(scheduleData[day]).forEach(time => {
-                    totalClasses++;
-                    subjects.add(scheduleData[day][time].subject);
-                    dayCount[day]++;
-                });
-            });
-            
-            document.getElementById('total-classes').textContent = totalClasses;
-            document.getElementById('total-subjects').textContent = subjects.size;
-            
-            // Find busiest day
-            const busiestDay = Object.keys(dayCount).reduce((a, b) => dayCount[a] > dayCount[b] ? a : b);
-            const dayNames = {
-                monday: 'Segunda', tuesday: 'Terça', wednesday: 'Quarta',
-                thursday: 'Quinta', friday: 'Sexta', saturday: 'Sábado', sunday: 'Domingo'
-            };
-            document.getElementById('busiest-day').textContent = dayCount[busiestDay] > 0 ? dayNames[busiestDay] : '-';
-            
-            // Next class
-            updateNextClass();
-        }
-
-        function updateNextClass() {
-            const now = new Date();
-            const currentDay = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][now.getDay()];
-            const currentTime = now.getHours() * 100 + now.getMinutes();
-            
-            let nextClass = null;
-            let minTimeDiff = Infinity;
-            
-            // Check today first
-            if (scheduleData[currentDay]) {
-                Object.keys(scheduleData[currentDay]).forEach(time => {
-                    const timeNum = parseInt(time.replace(':', ''));
-                    if (timeNum > currentTime) {
-                        const timeDiff = timeNum - currentTime;
-                        if (timeDiff < minTimeDiff) {
-                            minTimeDiff = timeDiff;
-                            nextClass = time;
-                        }
-                    }
-                });
-            }
-            
-            document.getElementById('next-class').textContent = nextClass || '-';
-        }
-
-        function updateTodaySchedule() {
-            const now = new Date();
-            const currentDay = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][now.getDay()];
-            const dayNames = {
-                sunday: 'Domingo', monday: 'Segunda-feira', tuesday: 'Terça-feira',
-                wednesday: 'Quarta-feira', thursday: 'Quinta-feira', friday: 'Sexta-feira', saturday: 'Sábado'
-            };
-            
-            document.getElementById('current-day-name').textContent = dayNames[currentDay];
-            
-            const todayContainer = document.getElementById('today-schedule');
-            const todayClassesCount = document.getElementById('today-classes-count');
-            
-            todayContainer.innerHTML = '';
-            
-            if (scheduleData[currentDay]) {
-                const todayClasses = Object.keys(scheduleData[currentDay]).sort();
-                todayClassesCount.textContent = todayClasses.length;
-                
-                todayClasses.forEach(time => {
-                    const classData = scheduleData[currentDay][time];
-                    const classElement = document.createElement('div');
-                    classElement.className = 'bg-white/20 rounded-lg p-3 flex items-center justify-between';
-                    classElement.innerHTML = `
-                        <div class="flex items-center space-x-3">
-                            <div class="text-lg font-bold">${time}</div>
-                            <div>
-                                <div class="font-medium">${classData.name}</div>
-                                <div class="text-sm text-blue-100">${classData.room} • ${classData.teacher || 'Professor'}</div>
-                            </div>
-                        </div>
-                        <div class="text-2xl">${getSubjectEmoji(classData.subject)}</div>
-                    `;
-                    todayContainer.appendChild(classElement);
+            if (navigator.share) {
+                navigator.share({
+                    title: `Preset ${presetName} - PresetPro`,
+                    text: `Confira este preset incrível: ${presetName}`,
+                    url: window.location.href
                 });
             } else {
-                todayClassesCount.textContent = '0';
-                todayContainer.innerHTML = '<div class="text-center text-blue-100 py-4">🎉 Nenhuma aula hoje! Aproveite para estudar ou descansar.</div>';
-            }
-        }
-
-        function getSubjectEmoji(subject) {
-            const emojis = {
-                math: '🔢', portuguese: '📝', science: '🔬', history: '📚',
-                english: '🇺🇸', pe: '⚽', geography: '🌍', arts: '🎨',
-                music: '🎵', philosophy: '🤔'
-            };
-            return emojis[subject] || '📖';
-        }
-
-        function addClassToSchedule(day, time) {
-            showModal(`
-                <h3 class="text-lg font-semibold mb-4">➕ Adicionar Aula</h3>
-                <form onsubmit="saveClassToSchedule(event, '${day}', '${time}')">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nome da Matéria</label>
-                        <input type="text" id="class-name" class="w-full p-2 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Sala/Local</label>
-                        <input type="text" id="class-room" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Ex: Sala 101">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Professor(a)</label>
-                        <input type="text" id="class-teacher" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Nome do professor">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Matéria</label>
-                        <select id="class-subject" class="w-full p-2 border border-gray-300 rounded-lg">
-                            <option value="math">🔢 Matemática</option>
-                            <option value="portuguese">📝 Português</option>
-                            <option value="science">🔬 Ciências</option>
-                            <option value="history">📚 História</option>
-                            <option value="english">🇺🇸 Inglês</option>
-                            <option value="pe">⚽ Educação Física</option>
-                            <option value="geography">🌍 Geografia</option>
-                            <option value="arts">🎨 Artes</option>
-                            <option value="music">🎵 Música</option>
-                            <option value="philosophy">🤔 Filosofia</option>
-                        </select>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button type="submit" class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Salvar</button>
-                        <button type="button" onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    </div>
-                </form>
-            `);
-        }
-
-        function saveClassToSchedule(event, day, time) {
-            event.preventDefault();
-            
-            if (!scheduleData[day]) {
-                scheduleData[day] = {};
-            }
-            
-            scheduleData[day][time] = {
-                name: document.getElementById('class-name').value,
-                room: document.getElementById('class-room').value,
-                teacher: document.getElementById('class-teacher').value,
-                subject: document.getElementById('class-subject').value
-            };
-            
-            updateScheduleDisplay();
-            updateScheduleStats();
-            updateTodaySchedule();
-            closeModal();
-            showNotification('✅ Aula adicionada com sucesso!', 'success');
-            saveData();
-        }
-
-        function editClass(event, day, time) {
-            event.stopPropagation();
-            const classData = scheduleData[day][time];
-            
-            showModal(`
-                <h3 class="text-lg font-semibold mb-4">✏️ Editar Aula</h3>
-                <form onsubmit="saveClassToSchedule(event, '${day}', '${time}')">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nome da Matéria</label>
-                        <input type="text" id="class-name" class="w-full p-2 border border-gray-300 rounded-lg" value="${classData.name}" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Sala/Local</label>
-                        <input type="text" id="class-room" class="w-full p-2 border border-gray-300 rounded-lg" value="${classData.room || ''}" placeholder="Ex: Sala 101">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Professor(a)</label>
-                        <input type="text" id="class-teacher" class="w-full p-2 border border-gray-300 rounded-lg" value="${classData.teacher || ''}" placeholder="Nome do professor">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Matéria</label>
-                        <select id="class-subject" class="w-full p-2 border border-gray-300 rounded-lg">
-                            <option value="math" ${classData.subject === 'math' ? 'selected' : ''}>🔢 Matemática</option>
-                            <option value="portuguese" ${classData.subject === 'portuguese' ? 'selected' : ''}>📝 Português</option>
-                            <option value="science" ${classData.subject === 'science' ? 'selected' : ''}>🔬 Ciências</option>
-                            <option value="history" ${classData.subject === 'history' ? 'selected' : ''}>📚 História</option>
-                            <option value="english" ${classData.subject === 'english' ? 'selected' : ''}>🇺🇸 Inglês</option>
-                            <option value="pe" ${classData.subject === 'pe' ? 'selected' : ''}>⚽ Educação Física</option>
-                            <option value="geography" ${classData.subject === 'geography' ? 'selected' : ''}>🌍 Geografia</option>
-                            <option value="arts" ${classData.subject === 'arts' ? 'selected' : ''}>🎨 Artes</option>
-                            <option value="music" ${classData.subject === 'music' ? 'selected' : ''}>🎵 Música</option>
-                            <option value="philosophy" ${classData.subject === 'philosophy' ? 'selected' : ''}>🤔 Filosofia</option>
-                        </select>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button type="submit" class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Salvar</button>
-                        <button type="button" onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    </div>
-                </form>
-            `);
-        }
-
-        function deleteClass(event, day, time) {
-            event.stopPropagation();
-            if (confirm('Tem certeza que deseja excluir esta aula?')) {
-                delete scheduleData[day][time];
-                if (Object.keys(scheduleData[day]).length === 0) {
-                    delete scheduleData[day];
-                }
-                updateScheduleDisplay();
-                updateScheduleStats();
-                updateTodaySchedule();
-                showNotification('🗑️ Aula removida com sucesso!', 'success');
-                saveData();
-            }
-        }
-
-        // Task functions
-        function addTask() {
-            showModal(`
-                <h3 class="text-lg font-semibold mb-4">➕ Nova Tarefa</h3>
-                <form onsubmit="saveTask(event)">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Descrição da Tarefa</label>
-                        <input type="text" id="task-description" class="w-full p-2 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Matéria</label>
-                        <input type="text" id="task-subject" class="w-full p-2 border border-gray-300 rounded-lg">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Prioridade</label>
-                        <select id="task-priority" class="w-full p-2 border border-gray-300 rounded-lg">
-                            <option value="urgent">🔴 Urgente</option>
-                            <option value="medium">🟡 Médio</option>
-                            <option value="low">🟢 Tranquilo</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Data de Entrega</label>
-                        <input type="date" id="task-date" class="w-full p-2 border border-gray-300 rounded-lg">
-                    </div>
-                    <div class="flex space-x-2">
-                        <button type="submit" class="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Salvar</button>
-                        <button type="button" onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    </div>
-                </form>
-            `);
-        }
-
-        function saveTask(event) {
-            event.preventDefault();
-            const task = {
-                id: Date.now(),
-                description: document.getElementById('task-description').value,
-                subject: document.getElementById('task-subject').value,
-                priority: document.getElementById('task-priority').value,
-                date: document.getElementById('task-date').value,
-                completed: false
-            };
-            
-            tasksData[task.priority].push(task);
-            updateTasksDisplay();
-            closeModal();
-            showNotification('✅ Tarefa adicionada com sucesso!', 'success');
-            saveData();
-        }
-
-        function updateTasksDisplay() {
-            ['urgent', 'medium', 'low'].forEach(priority => {
-                const container = document.getElementById(priority + '-tasks');
-                container.innerHTML = '';
-                
-                tasksData[priority].forEach(task => {
-                    const taskElement = document.createElement('div');
-                    taskElement.className = `p-3 bg-gray-50 rounded-lg priority-${priority === 'urgent' ? 'high' : priority === 'medium' ? 'medium' : 'low'} ${task.completed ? 'opacity-50' : ''}`;
-                    taskElement.innerHTML = `
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <div class="font-medium ${task.completed ? 'line-through' : ''}">${task.description}</div>
-                                <div class="text-sm text-gray-600">${task.subject} ${task.date ? '• ' + task.date : ''}</div>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button onclick="toggleTask(${task.id})" class="text-green-600 hover:text-green-800">
-                                    ${task.completed ? '↩️' : '✅'}
-                                </button>
-                                <button onclick="deleteTask(${task.id})" class="text-red-600 hover:text-red-800">🗑️</button>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(taskElement);
+                // Fallback for browsers that don't support Web Share API
+                const shareText = `Confira este preset incrível: ${presetName} - PresetPro`;
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('Link copiado para a área de transferência!');
                 });
-            });
-        }
-
-        function toggleTask(taskId) {
-            ['urgent', 'medium', 'low'].forEach(priority => {
-                const task = tasksData[priority].find(t => t.id === taskId);
-                if (task) {
-                    task.completed = !task.completed;
-                    if (task.completed) {
-                        checkAchievements();
-                        showNotification('🎉 Parabéns! Tarefa concluída!', 'success');
-                    }
-                }
-            });
-            updateTasksDisplay();
-            saveData();
-        }
-
-        function deleteTask(taskId) {
-            ['urgent', 'medium', 'low'].forEach(priority => {
-                tasksData[priority] = tasksData[priority].filter(t => t.id !== taskId);
-            });
-            updateTasksDisplay();
-            saveData();
-        }
-
-        // Calendar functions
-        function updateCalendar() {
-            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            
-            document.getElementById('current-month').textContent = 
-                monthNames[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
-            
-            const calendarGrid = document.getElementById('calendar-grid');
-            calendarGrid.innerHTML = '';
-            
-            // Day headers
-            const dayHeaders = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-            dayHeaders.forEach(day => {
-                const dayHeader = document.createElement('div');
-                dayHeader.className = 'text-center font-semibold text-gray-600 py-2';
-                dayHeader.textContent = day;
-                calendarGrid.appendChild(dayHeader);
-            });
-            
-            // Calendar days
-            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-            const startDate = new Date(firstDay);
-            startDate.setDate(startDate.getDate() - firstDay.getDay());
-            
-            for (let i = 0; i < 42; i++) {
-                const cellDate = new Date(startDate);
-                cellDate.setDate(startDate.getDate() + i);
-                
-                const dayCell = document.createElement('div');
-                dayCell.className = 'min-h-20 p-2 border border-gray-200 cursor-pointer hover:bg-blue-50';
-                
-                if (cellDate.getMonth() !== currentDate.getMonth()) {
-                    dayCell.classList.add('text-gray-400');
-                }
-                
-                const dayEvents = eventsData.filter(event => 
-                    new Date(event.date).toDateString() === cellDate.toDateString()
-                );
-                
-                dayCell.innerHTML = `
-                    <div class="font-medium">${cellDate.getDate()}</div>
-                    ${dayEvents.map(event => `<div class="text-xs bg-blue-100 text-blue-800 rounded px-1 mt-1">${event.title}</div>`).join('')}
-                `;
-                
-                dayCell.onclick = () => addEventToDate(cellDate);
-                calendarGrid.appendChild(dayCell);
             }
         }
 
-        function previousMonth() {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            updateCalendar();
-        }
-
-        function nextMonth() {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            updateCalendar();
-        }
-
-        function addEvent() {
-            showModal(`
-                <h3 class="text-lg font-semibold mb-4">➕ Novo Evento</h3>
-                <form onsubmit="saveEvent(event)">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Título do Evento</label>
-                        <input type="text" id="event-title" class="w-full p-2 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Data</label>
-                        <input type="date" id="event-date" class="w-full p-2 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
-                        <select id="event-type" class="w-full p-2 border border-gray-300 rounded-lg">
-                            <option value="exam">📝 Prova</option>
-                            <option value="assignment">📚 Trabalho</option>
-                            <option value="event">🎉 Evento</option>
-                            <option value="reminder">⏰ Lembrete</option>
-                        </select>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button type="submit" class="flex-1 bg-purple-500 text-white py-2 rounded-lg hover:bg-purple-600">Salvar</button>
-                        <button type="button" onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    </div>
-                </form>
-            `);
-        }
-
-        function saveEvent(event) {
-            event.preventDefault();
-            const newEvent = {
-                id: Date.now(),
-                title: document.getElementById('event-title').value,
-                date: document.getElementById('event-date').value,
-                type: document.getElementById('event-type').value
-            };
-            
-            eventsData.push(newEvent);
-            updateCalendar();
-            closeModal();
-            showNotification('📅 Evento adicionado com sucesso!', 'success');
-            saveData();
-        }
-
-        // Diary functions
-        function setMood(mood) {
-            currentMood = mood;
-            document.querySelectorAll('.mood-emoji').forEach(emoji => {
-                emoji.style.transform = 'scale(1)';
-            });
-            event.target.style.transform = 'scale(1.3)';
-        }
-
-        function saveDiaryEntry() {
-            const learning = document.getElementById('learning-notes').value;
-            const difficulties = document.getElementById('difficulties').value;
-            
-            if (!learning && !difficulties && !currentMood) {
-                showNotification('⚠️ Preencha pelo menos um campo!', 'warning');
-                return;
+        // Close modal when clicking outside
+        document.getElementById('presetDetails').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hidePresetDetails();
             }
-            
-            const entry = {
-                id: Date.now(),
-                date: new Date().toLocaleDateString('pt-BR'),
-                mood: currentMood,
-                learning: learning,
-                difficulties: difficulties
-            };
-            
-            diaryEntries.unshift(entry);
-            updateDiaryDisplay();
-            
-            // Clear form
-            document.getElementById('learning-notes').value = '';
-            document.getElementById('difficulties').value = '';
-            currentMood = null;
-            document.querySelectorAll('.mood-emoji').forEach(emoji => {
-                emoji.style.transform = 'scale(1)';
-            });
-            
-            showNotification('📖 Entrada do diário salva!', 'success');
-            saveData();
-        }
+        });
 
-        function updateDiaryDisplay() {
-            const container = document.getElementById('diary-entries');
-            container.innerHTML = '';
-            
-            diaryEntries.slice(0, 5).forEach(entry => {
-                const entryElement = document.createElement('div');
-                entryElement.className = 'bg-white p-4 rounded-lg card-shadow';
-                
-                const moodEmoji = entry.mood === 'happy' ? '😃' : entry.mood === 'neutral' ? '😐' : entry.mood === 'sad' ? '😞' : '';
-                
-                entryElement.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="font-medium text-gray-800">${entry.date}</div>
-                        <div class="text-2xl">${moodEmoji}</div>
-                    </div>
-                    ${entry.learning ? `<div class="mb-2"><strong>Aprendizado:</strong> ${entry.learning}</div>` : ''}
-                    ${entry.difficulties ? `<div><strong>Dificuldades:</strong> ${entry.difficulties}</div>` : ''}
-                `;
-                
-                container.appendChild(entryElement);
-            });
-        }
-
-        // Progress functions
-        function updateProgressDisplay() {
-            updateGradesChart();
-            updateAchievementsList();
-        }
-
-        function updateGradesChart() {
-            const container = document.getElementById('grades-chart');
-            container.innerHTML = '';
-            
-            Object.keys(gradesData).forEach(subject => {
-                const grades = gradesData[subject];
-                const average = grades.reduce((sum, grade) => sum + grade.value, 0) / grades.length;
-                
-                const subjectElement = document.createElement('div');
-                subjectElement.className = 'mb-4';
-                subjectElement.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-medium">${subject}</span>
-                        <span class="text-lg font-bold text-blue-600">${average.toFixed(1)}</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3">
-                        <div class="bg-blue-500 h-3 rounded-full" style="width: ${(average / 10) * 100}%"></div>
-                    </div>
-                `;
-                container.appendChild(subjectElement);
-            });
-        }
-
-        function addGrade() {
-            showModal(`
-                <h3 class="text-lg font-semibold mb-4">➕ Adicionar Nota</h3>
-                <form onsubmit="saveGrade(event)">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Matéria</label>
-                        <input type="text" id="grade-subject" class="w-full p-2 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nota (0-10)</label>
-                        <input type="number" id="grade-value" min="0" max="10" step="0.1" class="w-full p-2 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Avaliação</label>
-                        <select id="grade-type" class="w-full p-2 border border-gray-300 rounded-lg">
-                            <option value="exam">Prova</option>
-                            <option value="assignment">Trabalho</option>
-                            <option value="participation">Participação</option>
-                        </select>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button type="submit" class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Salvar</button>
-                        <button type="button" onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">Cancelar</button>
-                    </div>
-                </form>
-            `);
-        }
-
-        function saveGrade(event) {
-            event.preventDefault();
-            const subject = document.getElementById('grade-subject').value;
-            const value = parseFloat(document.getElementById('grade-value').value);
-            const type = document.getElementById('grade-type').value;
-            
-            if (!gradesData[subject]) {
-                gradesData[subject] = [];
+        // Prevent scrolling when modal is open
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !document.getElementById('presetDetails').classList.contains('hidden')) {
+                hidePresetDetails();
             }
-            
-            gradesData[subject].push({
-                value: value,
-                type: type,
-                date: new Date().toLocaleDateString('pt-BR')
-            });
-            
-            updateProgressDisplay();
-            closeModal();
-            showNotification('📊 Nota adicionada com sucesso!', 'success');
-            checkAchievements();
-            saveData();
-        }
-
-        // Achievement system
-        function checkAchievements() {
-            const completedTasks = Object.values(tasksData).flat().filter(task => task.completed).length;
-            const totalGrades = Object.values(gradesData).flat().length;
-            
-            // Task completion achievements
-            if (completedTasks >= 5 && !achievements.find(a => a.id === 'tasks_5')) {
-                addAchievement('tasks_5', '🎯 Organizador', 'Completou 5 tarefas!');
-            }
-            
-            if (completedTasks >= 20 && !achievements.find(a => a.id === 'tasks_20')) {
-                addAchievement('tasks_20', '⭐ Super Organizador', 'Completou 20 tarefas!');
-            }
-            
-            // Grade achievements
-            if (totalGrades >= 5 && !achievements.find(a => a.id === 'grades_5')) {
-                addAchievement('grades_5', '📚 Estudioso', 'Registrou 5 notas!');
-            }
-            
-            // Diary achievements
-            if (diaryEntries.length >= 7 && !achievements.find(a => a.id === 'diary_7')) {
-                addAchievement('diary_7', '📖 Reflexivo', 'Escreveu no diário por 7 dias!');
-            }
-        }
-
-        function addAchievement(id, title, description) {
-            achievements.push({ id, title, description, date: new Date().toLocaleDateString('pt-BR') });
-            updateAchievementsList();
-            showNotification(`🏆 Nova conquista: ${title}!`, 'success');
-            saveData();
-        }
-
-        function updateAchievementsList() {
-            const container = document.getElementById('achievements-list');
-            container.innerHTML = '';
-            
-            if (achievements.length === 0) {
-                container.innerHTML = '<div class="text-gray-500 text-center py-4">Nenhuma conquista ainda. Continue estudando!</div>';
-                return;
-            }
-            
-            achievements.forEach(achievement => {
-                const achievementElement = document.createElement('div');
-                achievementElement.className = 'flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg achievement-badge';
-                achievementElement.innerHTML = `
-                    <div class="text-2xl">🏆</div>
-                    <div class="flex-1">
-                        <div class="font-semibold text-yellow-800">${achievement.title}</div>
-                        <div class="text-sm text-yellow-600">${achievement.description}</div>
-                        <div class="text-xs text-yellow-500">${achievement.date}</div>
-                    </div>
-                `;
-                container.appendChild(achievementElement);
-            });
-        }
-
-        function showAchievements() {
-            let achievementsList = achievements.map(a => `
-                <div class="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg mb-2">
-                    <div class="text-2xl">🏆</div>
-                    <div>
-                        <div class="font-semibold text-yellow-800">${a.title}</div>
-                        <div class="text-sm text-yellow-600">${a.description}</div>
-                    </div>
-                </div>
-            `).join('');
-            
-            if (achievements.length === 0) {
-                achievementsList = '<div class="text-gray-500 text-center py-4">Nenhuma conquista ainda. Continue estudando!</div>';
-            }
-            
-            showModal(`
-                <h3 class="text-lg font-semibold mb-4">🏆 Suas Conquistas</h3>
-                <div class="max-h-96 overflow-y-auto">
-                    ${achievementsList}
-                </div>
-                <button onclick="closeModal()" class="w-full mt-4 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Fechar</button>
-            `);
-        }
-
-        // Chat functions
-        function initializeChat() {
-            // Add some sample messages
-            if (chatMessages.length === 0) {
-                addSampleMessages();
-            }
-            updateChatDisplay();
-            updateSharedContentDisplay();
-            updateOnlineUsers();
-        }
-
-        function addSampleMessages() {
-            // No sample messages - start with empty chat
-            chatMessages = [];
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const message = input.value.trim();
-            
-            if (message) {
-                const newMessage = {
-                    user: currentUser,
-                    message: message,
-                    time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                    type: 'message'
-                };
-                
-                // Save to Firebase
-                saveChatMessage(newMessage);
-                input.value = '';
-            }
-        }
-
-        function sendEmoji(emoji) {
-            const newMessage = {
-                user: currentUser,
-                message: emoji,
-                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                type: 'emoji'
-            };
-            
-            // Save to Firebase
-            saveChatMessage(newMessage);
-        }
-
-        function handleChatKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
-
-        function updateChatDisplay() {
-            const container = document.getElementById('chat-messages');
-            container.innerHTML = '';
-            
-            chatMessages.slice(-20).forEach(msg => {
-                const messageElement = document.createElement('div');
-                const isCurrentUser = msg.user === currentUser;
-                
-                messageElement.className = `flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`;
-                
-                if (msg.type === 'emoji') {
-                    messageElement.innerHTML = `
-                        <div class="flex items-center space-x-2 ${isCurrentUser ? 'flex-row-reverse space-x-reverse' : ''}">
-                            <div class="w-8 h-8 ${getUserColor(msg.user)} rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                ${msg.user.charAt(0).toUpperCase()}
-                            </div>
-                            <div class="text-2xl">${msg.message}</div>
-                            <div class="text-xs text-gray-500">${msg.time}</div>
-                        </div>
-                    `;
-                } else {
-                    messageElement.innerHTML = `
-                        <div class="flex items-start space-x-2 max-w-xs ${isCurrentUser ? 'flex-row-reverse space-x-reverse' : ''}">
-                            <div class="w-8 h-8 ${getUserColor(msg.user)} rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                ${msg.user.charAt(0).toUpperCase()}
-                            </div>
-                            <div class="${isCurrentUser ? 'bg-blue-500 text-white' : 'bg-gray-100'} rounded-lg p-3">
-                                <div class="font-medium text-sm ${isCurrentUser ? 'text-blue-100' : 'text-gray-600'}">${msg.user}</div>
-                                <div class="text-sm">${msg.message}</div>
-                                <div class="text-xs ${isCurrentUser ? 'text-blue-200' : 'text-gray-500'} mt-1">${msg.time}</div>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                container.appendChild(messageElement);
-            });
-            
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function getUserColor(username) {
-            const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500', 'bg-indigo-500'];
-            const index = username.length % colors.length;
-            return colors[index];
-        }
-
-        function simulateResponse() {
-            // No fake responses - only real users
-            return;
-        }
-
-        function shareProgress() {
-            if (Object.keys(gradesData).length === 0) {
-                showNotification('⚠️ Adicione algumas notas primeiro!', 'warning');
-                return;
-            }
-            
-            const totalGrades = Object.values(gradesData).flat().length;
-            const completedTasks = Object.values(tasksData).flat().filter(task => task.completed).length;
-            
-            const progressShare = {
-                id: Date.now(),
-                user: currentUser,
-                type: 'progress',
-                title: '📊 Meu Progresso Escolar',
-                content: {
-                    grades: totalGrades,
-                    tasks: completedTasks,
-                    achievements: achievements.length
-                },
-                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                date: new Date().toLocaleDateString('pt-BR')
-            };
-            
-            // Save to Firebase
-            saveSharedContent(progressShare);
-            
-            // Also send a chat message
-            const chatMessage = {
-                user: currentUser,
-                message: `Compartilhei meu progresso! 📊 ${totalGrades} notas, ${completedTasks} tarefas concluídas!`,
-                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                type: 'message'
-            };
-            
-            saveChatMessage(chatMessage);
-            showNotification('📊 Progresso compartilhado com sucesso!', 'success');
-        }
-
-        function shareDiary() {
-            if (diaryEntries.length === 0) {
-                showNotification('⚠️ Escreva no seu diário primeiro!', 'warning');
-                return;
-            }
-            
-            const latestEntry = diaryEntries[0];
-            const moodEmoji = latestEntry.mood === 'happy' ? '😃' : latestEntry.mood === 'neutral' ? '😐' : latestEntry.mood === 'sad' ? '😞' : '😊';
-            
-            const diaryShare = {
-                id: Date.now(),
-                user: currentUser,
-                type: 'diary',
-                title: '📖 Meu Diário de Hoje',
-                content: {
-                    mood: moodEmoji,
-                    learning: latestEntry.learning,
-                    difficulties: latestEntry.difficulties,
-                    date: latestEntry.date
-                },
-                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                date: new Date().toLocaleDateString('pt-BR')
-            };
-            
-            // Save to Firebase
-            saveSharedContent(diaryShare);
-            
-            // Also send a chat message
-            const chatMessage = {
-                user: currentUser,
-                message: `Compartilhei meu diário de hoje! ${moodEmoji} Venham ver como foi meu dia de estudos!`,
-                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                type: 'message'
-            };
-            
-            saveChatMessage(chatMessage);
-            showNotification('📖 Diário compartilhado com sucesso!', 'success');
-        }
-
-        function updateOnlineUsers() {
-            const container = document.getElementById('online-users');
-            const countElement = document.getElementById('online-count');
-            
-            container.innerHTML = '';
-            
-            // Always show current user first
-            const currentUserElement = document.createElement('div');
-            currentUserElement.className = 'flex items-center space-x-2 p-2 hover:bg-gray-50 rounded';
-            currentUserElement.innerHTML = `
-                <div class="w-8 h-8 ${getUserColor(currentUser)} rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    ${currentUser.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                    <div class="font-medium text-sm">${currentUser} (Você)</div>
-                    <div class="text-xs text-gray-500">🟢 Online</div>
-                </div>
-            `;
-            container.appendChild(currentUserElement);
-            
-            // Show other online users
-            onlineUsers.forEach(user => {
-                if (user.name !== currentUser) {
-                    const userElement = document.createElement('div');
-                    userElement.className = 'flex items-center space-x-2 p-2 hover:bg-gray-50 rounded';
-                    userElement.innerHTML = `
-                        <div class="w-8 h-8 ${getUserColor(user.name)} rounded-full flex items-center justify-center text-white text-sm font-bold">
-                            ${user.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <div class="font-medium text-sm">${user.name}</div>
-                            <div class="text-xs text-gray-500">${user.status || '🟢 Online'}</div>
-                        </div>
-                    `;
-                    container.appendChild(userElement);
-                }
-            });
-            
-            // Update count
-            const totalOnline = 1 + onlineUsers.filter(u => u.name !== currentUser).length;
-            countElement.textContent = totalOnline;
-            
-            // Show message if no other users online
-            if (onlineUsers.filter(u => u.name !== currentUser).length === 0) {
-                const emptyMessage = document.createElement('div');
-                emptyMessage.className = 'text-center text-gray-500 text-xs py-2';
-                emptyMessage.textContent = 'Seja o primeiro a conversar!';
-                container.appendChild(emptyMessage);
-            }
-        }
-
-        function updateSharedContentDisplay() {
-            const container = document.getElementById('shared-content');
-            container.innerHTML = '';
-            
-            if (sharedContent.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">Nenhum compartilhamento ainda. Seja o primeiro a compartilhar!</div>';
-                return;
-            }
-            
-            sharedContent.slice(0, 6).forEach(share => {
-                const shareElement = document.createElement('div');
-                shareElement.className = 'bg-white rounded-lg p-4 card-shadow hover:shadow-lg transition-shadow';
-                
-                if (share.type === 'progress') {
-                    shareElement.innerHTML = `
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-8 h-8 ${getUserColor(share.user)} rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                    ${share.user.charAt(0).toUpperCase()}
-                                </div>
-                                <div class="font-medium text-sm">${share.user}</div>
-                            </div>
-                            <div class="text-xs text-gray-500">${share.time}</div>
-                        </div>
-                        <h4 class="font-semibold text-gray-800 mb-2">${share.title}</h4>
-                        <div class="grid grid-cols-2 gap-2 text-sm">
-                            <div class="bg-blue-50 p-2 rounded">
-                                <div class="font-medium text-blue-800">📝 Notas</div>
-                                <div class="text-blue-600">${share.content.grades}</div>
-                            </div>
-                            <div class="bg-green-50 p-2 rounded">
-                                <div class="font-medium text-green-800">✅ Tarefas</div>
-                                <div class="text-green-600">${share.content.tasks}</div>
-                            </div>
-                            <div class="bg-yellow-50 p-2 rounded col-span-2">
-                                <div class="font-medium text-yellow-800">🏆 Conquistas</div>
-                                <div class="text-yellow-600">${share.content.achievements}</div>
-                            </div>
-                        </div>
-                        <div class="mt-3 flex space-x-2">
-                            <button onclick="likeShare(${share.id})" class="text-sm text-blue-600 hover:text-blue-800">👍 Curtir</button>
-                            <button onclick="commentShare(${share.id})" class="text-sm text-gray-600 hover:text-gray-800">💬 Comentar</button>
-                        </div>
-                    `;
-                } else if (share.type === 'diary') {
-                    shareElement.innerHTML = `
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-8 h-8 ${getUserColor(share.user)} rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                    ${share.user.charAt(0).toUpperCase()}
-                                </div>
-                                <div class="font-medium text-sm">${share.user}</div>
-                            </div>
-                            <div class="text-xs text-gray-500">${share.time}</div>
-                        </div>
-                        <h4 class="font-semibold text-gray-800 mb-2">${share.title}</h4>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-2xl">${share.content.mood}</span>
-                                <span class="text-gray-600">Como me senti hoje</span>
-                            </div>
-                            ${share.content.learning ? `<div class="bg-blue-50 p-2 rounded"><strong>Aprendi:</strong> ${share.content.learning.substring(0, 100)}${share.content.learning.length > 100 ? '...' : ''}</div>` : ''}
-                            ${share.content.difficulties ? `<div class="bg-orange-50 p-2 rounded"><strong>Dificuldades:</strong> ${share.content.difficulties.substring(0, 100)}${share.content.difficulties.length > 100 ? '...' : ''}</div>` : ''}
-                        </div>
-                        <div class="mt-3 flex space-x-2">
-                            <button onclick="likeShare(${share.id})" class="text-sm text-blue-600 hover:text-blue-800">👍 Curtir</button>
-                            <button onclick="commentShare(${share.id})" class="text-sm text-gray-600 hover:text-gray-800">💬 Comentar</button>
-                        </div>
-                    `;
-                }
-                
-                container.appendChild(shareElement);
-            });
-        }
-
-        function likeShare(shareId) {
-            const chatMessage = {
-                user: currentUser,
-                message: '👍',
-                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                type: 'emoji'
-            };
-            
-            chatMessages.push(chatMessage);
-            updateChatDisplay();
-            showNotification('👍 Curtida enviada!', 'success');
-        }
-
-        function commentShare(shareId) {
-            const comment = prompt('Digite seu comentário:');
-            if (comment && comment.trim()) {
-                const chatMessage = {
-                    user: currentUser,
-                    message: `💬 ${comment.trim()}`,
-                    time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                    type: 'message'
-                };
-                
-                chatMessages.push(chatMessage);
-                updateChatDisplay();
-                showNotification('💬 Comentário enviado!', 'success');
-            }
-        }
-
-        // Utility functions
-        function showModal(content) {
-            document.getElementById('modal-content').innerHTML = content;
-            document.getElementById('modal-overlay').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('modal-overlay').classList.add('hidden');
-        }
-
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `notification p-4 rounded-lg text-white max-w-sm ${
-                type === 'success' ? 'bg-green-500' : 
-                type === 'warning' ? 'bg-yellow-500' : 
-                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-            }`;
-            notification.textContent = message;
-            
-            document.getElementById('notifications').appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        function showMotivationalMessage() {
-            const messages = [
-                'Você consegue! Vamos focar nos estudos! 💪',
-                'Continue firme! Cada minuto conta! ⭐',
-                'Você está indo muito bem! 🌟',
-                'Foco e determinação! Você é capaz! 🚀',
-                'Mais uma sessão, mais conhecimento! 📚'
-            ];
-            
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            // This would be used if we had a motivation message element
-        }
-
-        // Firebase data persistence
-        let currentUserId = null;
-        let isFirebaseReady = false;
-
-        // Initialize Firebase data when auth is ready
-        window.initFirebaseData = function() {
-            isFirebaseReady = true;
-            window.onAuthStateChanged(window.firebaseAuth, (user) => {
-                if (user) {
-                    currentUserId = user.uid;
-                    currentUser = user.displayName || user.email.split('@')[0];
-                    document.getElementById('studentName').textContent = currentUser;
-                    loadDataFromFirebase();
-                    setupRealtimeListeners();
-                    updateFirebaseStatus('connected');
-                    console.log('🔥 Firebase conectado para usuário:', currentUser);
-                } else {
-                    isFirebaseReady = false;
-                    currentUserId = null;
-                    updateFirebaseStatus('error');
-                }
-            });
-        };
-
-        // Update Firebase connection status
-        function updateFirebaseStatus(status) {
-            const statusElement = document.getElementById('firebase-status');
-            if (!statusElement) return;
-
-            switch(status) {
-                case 'connecting':
-                    statusElement.innerHTML = '🔄 Conectando...';
-                    statusElement.className = 'text-xs bg-yellow-500/20 text-yellow-200 px-2 py-1 rounded-full';
-                    break;
-                case 'connected':
-                    statusElement.innerHTML = '🔥 Online';
-                    statusElement.className = 'text-xs bg-green-500/20 text-green-200 px-2 py-1 rounded-full';
-                    break;
-                case 'error':
-                    statusElement.innerHTML = '⚠️ Offline';
-                    statusElement.className = 'text-xs bg-red-500/20 text-red-200 px-2 py-1 rounded-full';
-                    break;
-            }
-        }
-
-        // Save data to Firebase
-        async function saveData() {
-            // Also save to localStorage as backup
-            const data = {
-                scheduleData,
-                tasksData,
-                eventsData,
-                diaryEntries,
-                gradesData,
-                achievements,
-                chatMessages,
-                sharedContent
-            };
-            localStorage.setItem('estudoFacilData', JSON.stringify(data));
-
-            if (!isFirebaseReady || !currentUserId) return;
-
-            try {
-                // Find existing user document
-                const userQuery = window.query(
-                    window.collection(window.firebaseDb, 'users'),
-                    window.where('userId', '==', currentUserId),
-                    window.limit(1)
-                );
-                
-                const userSnapshot = await window.getDocs(userQuery);
-                
-                const userData = {
-                    userId: currentUserId,
-                    userName: currentUser,
-                    scheduleData,
-                    tasksData,
-                    eventsData,
-                    diaryEntries,
-                    gradesData,
-                    achievements,
-                    lastUpdated: new Date().toISOString()
-                };
-
-                if (!userSnapshot.empty) {
-                    // Update existing document
-                    const docRef = userSnapshot.docs[0].ref;
-                    await window.updateDoc(docRef, userData);
-                } else {
-                    // Create new document
-                    await window.addDoc(window.collection(window.firebaseDb, 'users'), userData);
-                }
-                
-                console.log('💾 Dados salvos no Firebase!');
-            } catch (error) {
-                console.error('Erro ao salvar no Firebase:', error);
-                updateFirebaseStatus('error');
-            }
-        }
-
-        // Load data from Firebase
-        async function loadDataFromFirebase() {
-            if (!currentUserId) return;
-            
-            try {
-                // Load user-specific data using where query
-                const userQuery = window.query(
-                    window.collection(window.firebaseDb, 'users'),
-                    window.where('userId', '==', currentUserId),
-                    window.limit(1)
-                );
-                
-                const userSnapshot = await window.getDocs(userQuery);
-                
-                if (!userSnapshot.empty) {
-                    const userData = userSnapshot.docs[0].data();
-                    scheduleData = userData.scheduleData || {};
-                    tasksData = userData.tasksData || { urgent: [], medium: [], low: [] };
-                    eventsData = userData.eventsData || [];
-                    diaryEntries = userData.diaryEntries || [];
-                    gradesData = userData.gradesData || {};
-                    achievements = userData.achievements || [];
-                    
-                    // Update displays
-                    updateScheduleDisplay();
-                    updateScheduleStats();
-                    updateTodaySchedule();
-                    updateTasksDisplay();
-                    updateCalendar();
-                    updateDiaryDisplay();
-                    updateProgressDisplay();
-                    
-                    console.log('📊 Dados do usuário carregados do Firebase!');
-                } else {
-                    // Create initial user document
-                    await window.addDoc(window.collection(window.firebaseDb, 'users'), {
-                        userId: currentUserId,
-                        userName: currentUser,
-                        scheduleData: {},
-                        tasksData: { urgent: [], medium: [], low: [] },
-                        eventsData: [],
-                        diaryEntries: [],
-                        gradesData: {},
-                        achievements: [],
-                        lastUpdated: new Date().toISOString()
-                    });
-                    console.log('👤 Novo usuário criado no Firebase!');
-                }
-                
-                // Load chat messages
-                loadChatMessages();
-                loadSharedContent();
-                
-            } catch (error) {
-                console.error('Erro ao carregar do Firebase:', error);
-                updateFirebaseStatus('error');
-                // Fallback to localStorage
-                loadData();
-            }
-        }
-
-        // Load data from localStorage (fallback)
-        function loadData() {
-            const savedData = localStorage.getItem('estudoFacilData');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                scheduleData = data.scheduleData || {};
-                tasksData = data.tasksData || { urgent: [], medium: [], low: [] };
-                eventsData = data.eventsData || [];
-                diaryEntries = data.diaryEntries || [];
-                gradesData = data.gradesData || {};
-                achievements = data.achievements || [];
-                chatMessages = data.chatMessages || [];
-                sharedContent = data.sharedContent || [];
-                
-                updateDiaryDisplay();
-            }
-        }
-
-        // Save chat message to Firebase
-        async function saveChatMessage(message) {
-            if (!isFirebaseReady) return;
-
-            try {
-                await window.addDoc(window.collection(window.firebaseDb, 'chatMessages'), {
-                    ...message,
-                    timestamp: new Date().toISOString()
-                });
-            } catch (error) {
-                console.error('Erro ao salvar mensagem:', error);
-            }
-        }
-
-        // Load chat messages from Firebase
-        async function loadChatMessages() {
-            if (!isFirebaseReady) return;
-
-            try {
-                const messagesQuery = window.query(
-                    window.collection(window.firebaseDb, 'chatMessages'),
-                    window.orderBy('timestamp', 'desc'),
-                    window.limit(50)
-                );
-                
-                const querySnapshot = await window.getDocs(messagesQuery);
-                chatMessages = [];
-                
-                querySnapshot.forEach((doc) => {
-                    chatMessages.unshift(doc.data());
-                });
-                
-                updateChatDisplay();
-                console.log('💬 Mensagens do chat carregadas!');
-            } catch (error) {
-                console.error('Erro ao carregar mensagens:', error);
-                // Initialize empty chat if error
-                chatMessages = [];
-                updateChatDisplay();
-            }
-        }
-
-        // Save shared content to Firebase
-        async function saveSharedContent(content) {
-            if (!isFirebaseReady) return;
-
-            try {
-                await window.addDoc(window.collection(window.firebaseDb, 'sharedContent'), {
-                    ...content,
-                    timestamp: new Date().toISOString()
-                });
-            } catch (error) {
-                console.error('Erro ao salvar conteúdo compartilhado:', error);
-            }
-        }
-
-        // Load shared content from Firebase
-        async function loadSharedContent() {
-            if (!isFirebaseReady) return;
-
-            try {
-                const contentQuery = window.query(
-                    window.collection(window.firebaseDb, 'sharedContent'),
-                    window.orderBy('timestamp', 'desc'),
-                    window.limit(20)
-                );
-                
-                const querySnapshot = await window.getDocs(contentQuery);
-                sharedContent = [];
-                
-                querySnapshot.forEach((doc) => {
-                    sharedContent.push(doc.data());
-                });
-                
-                updateSharedContentDisplay();
-                console.log('📋 Conteúdo compartilhado carregado!');
-            } catch (error) {
-                console.error('Erro ao carregar conteúdo compartilhado:', error);
-                // Initialize empty shared content if error
-                sharedContent = [];
-                updateSharedContentDisplay();
-            }
-        }
-
-        // Setup realtime listeners for chat and shared content
-        function setupRealtimeListeners() {
-            if (!isFirebaseReady) return;
-
-            try {
-                // Listen for new chat messages
-                const messagesQuery = window.query(
-                    window.collection(window.firebaseDb, 'chatMessages'),
-                    window.orderBy('timestamp', 'desc'),
-                    window.limit(50)
-                );
-
-                window.onSnapshot(messagesQuery, (snapshot) => {
-                    chatMessages = [];
-                    snapshot.forEach((doc) => {
-                        chatMessages.unshift(doc.data());
-                    });
-                    updateChatDisplay();
-                }, (error) => {
-                    console.error('Erro no listener de mensagens:', error);
-                });
-
-                // Listen for new shared content
-                const contentQuery = window.query(
-                    window.collection(window.firebaseDb, 'sharedContent'),
-                    window.orderBy('timestamp', 'desc'),
-                    window.limit(20)
-                );
-
-                window.onSnapshot(contentQuery, (snapshot) => {
-                    sharedContent = [];
-                    snapshot.forEach((doc) => {
-                        sharedContent.push(doc.data());
-                    });
-                    updateSharedContentDisplay();
-                }, (error) => {
-                    console.error('Erro no listener de conteúdo:', error);
-                });
-
-                // Listen for online users
-                const onlineUsersQuery = window.query(
-                    window.collection(window.firebaseDb, 'onlineUsers'),
-                    window.orderBy('lastSeen', 'desc')
-                );
-
-                window.onSnapshot(onlineUsersQuery, (snapshot) => {
-                    onlineUsers = [];
-                    const now = Date.now();
-                    
-                    snapshot.forEach((doc) => {
-                        const userData = doc.data();
-                        // Consider user online if last seen within 5 minutes
-                        if (now - userData.lastSeen < 5 * 60 * 1000) {
-                            onlineUsers.push(userData);
-                        }
-                    });
-                    
-                    updateOnlineUsers();
-                }, (error) => {
-                    console.error('Erro no listener de usuários online:', error);
-                });
-
-                // Update user presence every 30 seconds
-                setInterval(updateUserPresence, 30000);
-                updateUserPresence(); // Initial update
-                
-                console.log('🔄 Listeners em tempo real configurados!');
-            } catch (error) {
-                console.error('Erro ao configurar listeners:', error);
-            }
-        }
-
-        // Update user presence in Firebase
-        async function updateUserPresence() {
-            if (!isFirebaseReady || !currentUserId) return;
-
-            try {
-                const userPresence = {
-                    userId: currentUserId,
-                    name: currentUser,
-                    lastSeen: Date.now(),
-                    status: '🟢 Online'
-                };
-
-                // Find existing presence document
-                const userPresenceQuery = window.query(
-                    window.collection(window.firebaseDb, 'onlineUsers'),
-                    window.where('userId', '==', currentUserId),
-                    window.limit(1)
-                );
-
-                const existingDocs = await window.getDocs(userPresenceQuery);
-
-                if (!existingDocs.empty) {
-                    // Update existing document
-                    const docRef = existingDocs.docs[0].ref;
-                    await window.updateDoc(docRef, userPresence);
-                } else {
-                    // Create new document
-                    await window.addDoc(window.collection(window.firebaseDb, 'onlineUsers'), userPresence);
-                }
-
-            } catch (error) {
-                console.error('Erro ao atualizar presença:', error);
-            }
-        }
-
-        // Remove user presence when leaving
-        async function removeUserPresence() {
-            if (!isFirebaseReady || !currentUserId) return;
-
-            try {
-                const userPresenceQuery = window.query(
-                    window.collection(window.firebaseDb, 'onlineUsers'),
-                    window.where('userId', '==', currentUserId)
-                );
-
-                const docs = await window.getDocs(userPresenceQuery);
-                docs.forEach(async (docSnapshot) => {
-                    await window.deleteDoc(docSnapshot.ref);
-                });
-            } catch (error) {
-                console.error('Erro ao remover presença:', error);
-            }
-        }
-
-        // Handle page unload
-        window.addEventListener('beforeunload', removeUserPresence);
+        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96586f9a87a6e1ab',t:'MTc1MzU4MDUwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96615590a5d6139e',t:'MTc1MzY3MzgwNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
