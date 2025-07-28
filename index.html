@@ -2,381 +2,324 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PresetPro - Presets para iPhone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>PhotoPro - Presets Profissionais</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .gradient-bg {
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overscroll-behavior: none;
+        }
+        
+        .ios-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .ios-card:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .preset-preview {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 400% 400%;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .filter-preview {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .filter-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--filter-color);
+            mix-blend-mode: var(--blend-mode);
+            opacity: var(--filter-opacity);
+        }
+        
+        .modal-backdrop {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .ios-button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.2s ease;
         }
-        .preset-card {
-            transition: all 0.3s ease;
+        
+        .ios-button:active {
+            transform: scale(0.98);
+        }
+        
+        .category-badge {
+            background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
-        .preset-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        
+        .search-bar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .category-header {
-            background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-            backdrop-filter: blur(10px);
+        
+        .intensity-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            height: 6px;
+            outline: none;
         }
-        .back-btn {
-            transition: all 0.3s ease;
+        
+        .intensity-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
-        .back-btn:hover {
-            transform: translateX(-2px);
+        
+        .photo-frame {
+            aspect-ratio: 4/5;
+            background: #f0f0f0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .before-after {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .after-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            border-right: 2px solid white;
+        }
+        
+        .divider-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: white;
+            z-index: 10;
         }
     </style>
 </head>
-<body class="gradient-bg min-h-screen">
+<body class="min-h-screen">
+    <!-- Status Bar Simulation -->
+    <div class="bg-black/20 text-white text-xs py-1 px-4 flex justify-between items-center">
+        <span>9:41</span>
+        <span>📶 📶 📶 🔋</span>
+    </div>
+
     <!-- Header -->
-    <div class="bg-white/10 backdrop-blur-md border-b border-white/20">
-        <div class="max-w-md mx-auto px-4 py-4">
+    <div class="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-40">
+        <div class="px-4 py-4">
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold text-white">PresetPro</h1>
-                <div class="bg-green-500/80 rounded-full px-3 py-1">
-                    <span class="text-white text-sm font-medium">100% GRÁTIS</span>
+                <h1 class="text-2xl font-bold text-white">PhotoPro</h1>
+                <div class="category-badge rounded-full px-3 py-1">
+                    <span class="text-white text-sm font-medium">150+ Presets</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div id="mainContent" class="max-w-md mx-auto px-4 py-6">
+    <!-- Main App Container -->
+    <div id="mainApp" class="px-4 py-6 pb-20">
         <!-- Search Bar -->
         <div class="mb-6">
-            <div class="relative">
+            <div class="search-bar rounded-2xl px-4 py-3 flex items-center">
+                <span class="text-white/70 mr-3">🔍</span>
                 <input type="text" id="searchInput" placeholder="Buscar presets..." 
-                       class="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">
-                <div class="absolute right-3 top-3">
-                    <span class="text-white/70">🔍</span>
-                </div>
+                       class="bg-transparent text-white placeholder-white/70 flex-1 outline-none">
             </div>
         </div>
 
-        <!-- Categories -->
-        <div id="categoriesContainer">
-            <!-- Luz Natural -->
-            <div class="category-header rounded-t-xl px-4 py-3 mb-2">
-                <h2 class="text-lg font-semibold text-white flex items-center">
-                    <span class="mr-2">🌅</span>
-                    Luz Natural e Ambientes Externos
-                </h2>
+        <!-- Quick Categories -->
+        <div class="mb-6">
+            <div class="flex space-x-3 overflow-x-auto pb-2">
+                <button onclick="filterCategory('all')" class="category-btn category-badge rounded-full px-4 py-2 text-white text-sm font-medium whitespace-nowrap active">
+                    Todos
+                </button>
+                <button onclick="filterCategory('portrait')" class="category-btn category-badge rounded-full px-4 py-2 text-white text-sm font-medium whitespace-nowrap">
+                    Retratos
+                </button>
+                <button onclick="filterCategory('landscape')" class="category-btn category-badge rounded-full px-4 py-2 text-white text-sm font-medium whitespace-nowrap">
+                    Paisagens
+                </button>
+                <button onclick="filterCategory('vintage')" class="category-btn category-badge rounded-full px-4 py-2 text-white text-sm font-medium whitespace-nowrap">
+                    Vintage
+                </button>
+                <button onclick="filterCategory('cinematic')" class="category-btn category-badge rounded-full px-4 py-2 text-white text-sm font-medium whitespace-nowrap">
+                    Cinema
+                </button>
             </div>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Golden Hour', '🌅', 'Perfeito para fotos durante o pôr do sol', 'GRÁTIS', 'Realça tons dourados e cria uma atmosfera mágica nas suas fotos. Ideal para retratos e paisagens durante a golden hour.')">
-                    <div class="text-2xl mb-2">🌅</div>
-                    <h3 class="text-white font-medium text-sm">Golden Hour</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Soft Sunset', '🌇', 'Tons suaves de pôr do sol', 'GRÁTIS', 'Cria uma atmosfera romântica com tons rosados e alaranjados suaves. Perfeito para momentos especiais.')">
-                    <div class="text-2xl mb-2">🌇</div>
-                    <h3 class="text-white font-medium text-sm">Soft Sunset</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Warm Breeze', '🍃', 'Sensação de brisa quente', 'GRÁTIS', 'Adiciona calor e movimento às suas fotos ao ar livre. Ideal para fotos em parques e jardins.')">
-                    <div class="text-2xl mb-2">🍃</div>
-                    <h3 class="text-white font-medium text-sm">Warm Breeze</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Blue Sky Pop', '☁️', 'Céu azul vibrante', 'GRÁTIS', 'Intensifica o azul do céu e as nuvens brancas. Perfeito para fotos de paisagens e arquitetura.')">
-                    <div class="text-2xl mb-2">☁️</div>
-                    <h3 class="text-white font-medium text-sm">Blue Sky Pop</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Sunlit Skin', '☀️', 'Pele iluminada pelo sol', 'GRÁTIS', 'Realça a pele com luz natural, criando um brilho saudável e natural.')">
-                    <div class="text-2xl mb-2">☀️</div>
-                    <h3 class="text-white font-medium text-sm">Sunlit Skin</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Outdoor Clean', '🌿', 'Limpeza para externos', 'GRÁTIS', 'Look limpo e natural para fotos ao ar livre. Mantém as cores verdadeiras com um toque profissional.')">
-                    <div class="text-2xl mb-2">🌿</div>
-                    <h3 class="text-white font-medium text-sm">Outdoor Clean</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Beach Glow', '🏖️', 'Brilho de praia', 'GRÁTIS', 'Captura a essência das férias na praia com tons quentes e brilhantes.')">
-                    <div class="text-2xl mb-2">🏖️</div>
-                    <h3 class="text-white font-medium text-sm">Beach Glow</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Pool Vibe Pro', '🏊', 'Vibe de piscina profissional', 'GRÁTIS', 'Realça o azul da água e cria uma atmosfera refrescante e vibrante.')">
-                    <div class="text-2xl mb-2">🏊</div>
-                    <h3 class="text-white font-medium text-sm">Pool Vibe Pro</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Nature Bright', '🌳', 'Natureza brilhante', 'GRÁTIS', 'Intensifica os verdes da natureza e adiciona brilho às fotos de paisagens.')">
-                    <div class="text-2xl mb-2">🌳</div>
-                    <h3 class="text-white font-medium text-sm">Nature Bright</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Forest Tones', '🌲', 'Tons de floresta', 'GRÁTIS', 'Cria uma atmosfera misteriosa e natural com tons terrosos e verdes profundos.')">
-                    <div class="text-2xl mb-2">🌲</div>
-                    <h3 class="text-white font-medium text-sm">Forest Tones</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
+        </div>
+
+        <!-- Presets Grid -->
+        <div id="presetsGrid" class="grid grid-cols-2 gap-4">
+            <!-- Portrait Presets -->
+            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="portrait" onclick="openPreset('Skin Perfection', '✨', 'portrait', 'Suaviza a pele mantendo detalhes naturais', '#ff9a9e, #fecfef', 'overlay', '0.3')">
+                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #ff9a9e, #fecfef); --blend-mode: overlay; --filter-opacity: 0.3;"></div>
+                <h3 class="text-white font-semibold text-sm mb-1">Skin Perfection</h3>
+                <p class="text-white/70 text-xs">Retrato Profissional</p>
             </div>
 
-            <!-- Ambientes Internos -->
-            <div class="category-header rounded-t-xl px-4 py-3 mb-2">
-                <h2 class="text-lg font-semibold text-white flex items-center">
-                    <span class="mr-2">🏠</span>
-                    Ambientes Internos (Indoor)
-                </h2>
-            </div>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Indoor Clean Light', '💡', 'Luz limpa para interiores', 'GRÁTIS', 'Otimiza a iluminação artificial para fotos em ambientes fechados.')">
-                    <div class="text-2xl mb-2">💡</div>
-                    <h3 class="text-white font-medium text-sm">Indoor Clean Light</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Cozy Home', '🏡', 'Casa aconchegante', 'GRÁTIS', 'Cria uma atmosfera acolhedora e calorosa para fotos domésticas.')">
-                    <div class="text-2xl mb-2">🏡</div>
-                    <h3 class="text-white font-medium text-sm">Cozy Home</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Warm Room', '🔥', 'Ambiente quente', 'GRÁTIS', 'Adiciona calor e conforto às fotos de interiores.')">
-                    <div class="text-2xl mb-2">🔥</div>
-                    <h3 class="text-white font-medium text-sm">Warm Room</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Studio Soft', '📸', 'Estúdio suave', 'GRÁTIS', 'Look profissional de estúdio com iluminação suave e equilibrada.')">
-                    <div class="text-2xl mb-2">📸</div>
-                    <h3 class="text-white font-medium text-sm">Studio Soft</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('White Walls', '⬜', 'Paredes brancas', 'GRÁTIS', 'Otimizado para ambientes com paredes brancas e luz natural.')">
-                    <div class="text-2xl mb-2">⬜</div>
-                    <h3 class="text-white font-medium text-sm">White Walls</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Low Light Boost', '🌙', 'Reforço para pouca luz', 'GRÁTIS', 'Melhora fotos tiradas em ambientes com pouca iluminação.')">
-                    <div class="text-2xl mb-2">🌙</div>
-                    <h3 class="text-white font-medium text-sm">Low Light Boost</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Home Vibes', '🛋️', 'Vibes de casa', 'GRÁTIS', 'Captura a essência do lar com tons quentes e aconchegantes.')">
-                    <div class="text-2xl mb-2">🛋️</div>
-                    <h3 class="text-white font-medium text-sm">Home Vibes</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Coffee Mood', '☕', 'Clima de café', 'GRÁTIS', 'Perfeito para fotos em cafeterias e momentos de pausa.')">
-                    <div class="text-2xl mb-2">☕</div>
-                    <h3 class="text-white font-medium text-sm">Coffee Mood</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Desk Setup', '💻', 'Setup de mesa', 'GRÁTIS', 'Ideal para fotos de workspace e setup de trabalho.')">
-                    <div class="text-2xl mb-2">💻</div>
-                    <h3 class="text-white font-medium text-sm">Desk Setup</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Plant Corner', '🪴', 'Cantinho das plantas', 'GRÁTIS', 'Realça o verde das plantas em ambientes internos.')">
-                    <div class="text-2xl mb-2">🪴</div>
-                    <h3 class="text-white font-medium text-sm">Plant Corner</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
+            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="portrait" onclick="openPreset('Golden Portrait', '🌟', 'portrait', 'Tons dourados quentes para retratos', '#f093fb, #f5576c', 'soft-light', '0.4')">
+                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #f093fb, #f5576c); --blend-mode: soft-light; --filter-opacity: 0.4;"></div>
+                <h3 class="text-white font-semibold text-sm mb-1">Golden Portrait</h3>
+                <p class="text-white/70 text-xs">Tons Dourados</p>
             </div>
 
-            <!-- Retratos e Selfies -->
-            <div class="category-header rounded-t-xl px-4 py-3 mb-2">
-                <h2 class="text-lg font-semibold text-white flex items-center">
-                    <span class="mr-2">💁</span>
-                    Retratos e Selfies
-                </h2>
-            </div>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Smooth Skin', '✨', 'Pele suave', 'GRÁTIS', 'Suaviza a pele mantendo a naturalidade. Perfeito para retratos e selfies.')">
-                    <div class="text-2xl mb-2">✨</div>
-                    <h3 class="text-white font-medium text-sm">Smooth Skin</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Bronze Touch', '🥉', 'Toque bronzeado', 'GRÁTIS', 'Adiciona um bronzeado natural e saudável à pele.')">
-                    <div class="text-2xl mb-2">🥉</div>
-                    <h3 class="text-white font-medium text-sm">Bronze Touch</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Soft Glow', '🌟', 'Brilho suave', 'GRÁTIS', 'Cria um brilho natural e luminoso na pele.')">
-                    <div class="text-2xl mb-2">🌟</div>
-                    <h3 class="text-white font-medium text-sm">Soft Glow</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Selfie Shine', '🤳', 'Brilho de selfie', 'GRÁTIS', 'Otimizado especialmente para selfies com luz frontal.')">
-                    <div class="text-2xl mb-2">🤳</div>
-                    <h3 class="text-white font-medium text-sm">Selfie Shine</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Natural Beauty', '🌸', 'Beleza natural', 'GRÁTIS', 'Realça a beleza natural sem exageros.')">
-                    <div class="text-2xl mb-2">🌸</div>
-                    <h3 class="text-white font-medium text-sm">Natural Beauty</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Golden Tan', '🏆', 'Bronzeado dourado', 'GRÁTIS', 'Bronzeado com tons dourados para um look radiante.')">
-                    <div class="text-2xl mb-2">🏆</div>
-                    <h3 class="text-white font-medium text-sm">Golden Tan</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Flawless Face', '💎', 'Rosto impecável', 'GRÁTIS', 'Look impecável mantendo a naturalidade da pele.')">
-                    <div class="text-2xl mb-2">💎</div>
-                    <h3 class="text-white font-medium text-sm">Flawless Face</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Peach Skin', '🍑', 'Pele de pêssego', 'GRÁTIS', 'Tons rosados e suaves para uma pele de pêssego.')">
-                    <div class="text-2xl mb-2">🍑</div>
-                    <h3 class="text-white font-medium text-sm">Peach Skin</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('No Filter Look', '🚫', 'Look sem filtro', 'GRÁTIS', 'Aparência natural como se não houvesse filtro.')">
-                    <div class="text-2xl mb-2">🚫</div>
-                    <h3 class="text-white font-medium text-sm">No Filter Look</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Glow Up', '💫', 'Transformação radiante', 'GRÁTIS', 'Transformação sutil que realça todos os melhores aspectos.')">
-                    <div class="text-2xl mb-2">💫</div>
-                    <h3 class="text-white font-medium text-sm">Glow Up</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
+            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="portrait" onclick="openPreset('Natural Glow', '🌸', 'portrait', 'Brilho natural e saudável', '#ffecd2, #fcb69f', 'multiply', '0.25')">
+                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #ffecd2, #fcb69f); --blend-mode: multiply; --filter-opacity: 0.25;"></div>
+                <h3 class="text-white font-semibold text-sm mb-1">Natural Glow</h3>
+                <p class="text-white/70 text-xs">Brilho Natural</p>
             </div>
 
-            <!-- Continue with other categories... -->
-            <!-- For brevity, I'll add a few more key categories -->
-
-            <!-- Viagens -->
-            <div class="category-header rounded-t-xl px-4 py-3 mb-2">
-                <h2 class="text-lg font-semibold text-white flex items-center">
-                    <span class="mr-2">✈️</span>
-                    Viagens
-                </h2>
-            </div>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Wanderlust', '🗺️', 'Espírito aventureiro', 'GRÁTIS', 'Captura o espírito de aventura e descoberta em suas viagens.')">
-                    <div class="text-2xl mb-2">🗺️</div>
-                    <h3 class="text-white font-medium text-sm">Wanderlust</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Travel Diary', '📖', 'Diário de viagem', 'GRÁTIS', 'Look nostálgico perfeito para documentar suas aventuras.')">
-                    <div class="text-2xl mb-2">📖</div>
-                    <h3 class="text-white font-medium text-sm">Travel Diary</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('City Pop', '🏙️', 'Vibe urbana', 'GRÁTIS', 'Perfeito para fotos em grandes cidades e ambientes urbanos.')">
-                    <div class="text-2xl mb-2">🏙️</div>
-                    <h3 class="text-white font-medium text-sm">City Pop</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Tokyo Lights', '🏮', 'Luzes de Tóquio', 'GRÁTIS', 'Inspirado nas luzes neon e na atmosfera única do Japão.')">
-                    <div class="text-2xl mb-2">🏮</div>
-                    <h3 class="text-white font-medium text-sm">Tokyo Lights</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
+            <!-- Landscape Presets -->
+            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="landscape" onclick="openPreset('Sunset Magic', '🌅', 'landscape', 'Realça cores do pôr do sol', '#ff9a56, #ff6b95', 'color-burn', '0.35')">
+                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #ff9a56, #ff6b95); --blend-mode: color-burn; --filter-opacity: 0.35;"></div>
+                <h3 class="text-white font-semibold text-sm mb-1">Sunset Magic</h3>
+                <p class="text-white/70 text-xs">Pôr do Sol</p>
             </div>
 
-            <!-- Instagram/Influencer -->
-            <div class="category-header rounded-t-xl px-4 py-3 mb-2">
-                <h2 class="text-lg font-semibold text-white flex items-center">
-                    <span class="mr-2">🎨</span>
-                    Estilo Instagram / Influencer
-                </h2>
+            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="landscape" onclick="openPreset('Ocean Breeze', '🌊', 'landscape', 'Tons azuis refrescantes', '#4facfe, #00f2fe', 'screen', '0.3')">
+                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #4facfe, #00f2fe); --blend-mode: screen; --filter-opacity: 0.3;"></div>
+                <h3 class="text-white font-semibold text-sm mb-1">Ocean Breeze</h3>
+                <p class="text-white/70 text-xs">Tons Oceânicos</p>
             </div>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Blogger Soft', '📱', 'Blogger suave', 'GRÁTIS', 'Look suave e profissional perfeito para influenciadores.')">
-                    <div class="text-2xl mb-2">📱</div>
-                    <h3 class="text-white font-medium text-sm">Blogger Soft</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('VSCO Vibe', '📷', 'Vibe VSCO', 'GRÁTIS', 'Estilo VSCO clássico com tons suaves e naturais.')">
-                    <div class="text-2xl mb-2">📷</div>
-                    <h3 class="text-white font-medium text-sm">VSCO Vibe</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Pink Mood', '💗', 'Mood rosa', 'GRÁTIS', 'Tons rosados delicados para um feed feminino e elegante.')">
-                    <div class="text-2xl mb-2">💗</div>
-                    <h3 class="text-white font-medium text-sm">Pink Mood</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
-                <div class="preset-card bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 cursor-pointer" onclick="showPresetDetails('Ice Aesthetic', '🧊', 'Estética gelada', 'GRÁTIS', 'Tons frios e minimalistas para um look moderno.')">
-                    <div class="text-2xl mb-2">🧊</div>
-                    <h3 class="text-white font-medium text-sm">Ice Aesthetic</h3>
-                    <p class="text-green-400 text-xs mt-1 font-semibold">GRÁTIS</p>
-                </div>
+
+            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="landscape" onclick="openPreset('Forest Dreams', '🌲', 'landscape', 'Verdes vibrantes da natureza', '#56ab2f, #a8e6cf', 'multiply', '0.4')">
+                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #56ab2f, #a8e6cf); --blend-mode: multiply; --filter-opacity: 0.4;"></div>
+                <h3 class="text-white font-semibold text-sm mb-1">Forest Dreams</h3>
+                <p class="text-white/70 text-xs">Natureza Vibrante</p>
+            </div>
+
+            <!-- Vintage Presets -->
+            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="vintage" onclick="openPreset('Film Noir', '🎬', 'vintage', 'Estilo clássico preto e branco', '#434343, #000000', 'luminosity', '0.6')">
+                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #434343, #000000); --blend-mode: luminosity; --filter-opacity: 0.6;"></div>
+                <h3 class="text-white font-semibold text-sm mb-1">Film Noir</h3>
+                <p class="text-white/70 text-xs">P&B Clássico</p>
+            </div>
+
+            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="vintage" onclick="openPreset('Retro Warm', '📸', 'vintage', 'Tons quentes nostálgicos', '#f7971e, #ffd200', 'overlay', '0.45')">
+                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #f7971e, #ffd200); --blend-mode: overlay; --filter-opacity: 0.45;"></div>
+                <h3 class="text-white font-semibold text-sm mb-1">Retro Warm</h3>
+                <p class="text-white/70 text-xs">Nostalgia Quente</p>
+            </div>
+
+            <!-- Cinematic Presets -->
+            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="cinematic" onclick="openPreset('Teal & Orange', '🎥', 'cinematic', 'Look cinematográfico profissional', '#ff7e5f, #feb47b', 'color-dodge', '0.35')">
+                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #ff7e5f, #feb47b); --blend-mode: color-dodge; --filter-opacity: 0.35;"></div>
+                <h3 class="text-white font-semibold text-sm mb-1">Teal & Orange</h3>
+                <p class="text-white/70 text-xs">Cinema Profissional</p>
+            </div>
+
+            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="cinematic" onclick="openPreset('Moody Blue', '🌙', 'cinematic', 'Atmosfera dramática azulada', '#2196f3, #21cbf3', 'multiply', '0.4')">
+                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #2196f3, #21cbf3); --blend-mode: multiply; --filter-opacity: 0.4;"></div>
+                <h3 class="text-white font-semibold text-sm mb-1">Moody Blue</h3>
+                <p class="text-white/70 text-xs">Drama Azulado</p>
             </div>
         </div>
     </div>
 
-    <!-- Preset Details Modal -->
-    <div id="presetDetails" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
-        <div class="max-w-md mx-auto h-full flex items-center justify-center p-4">
-            <div class="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 w-full max-h-[90vh] overflow-y-auto">
-                <!-- Header -->
-                <div class="flex items-center justify-between p-6 border-b border-white/20">
-                    <button onclick="hidePresetDetails()" class="back-btn text-white/70 hover:text-white flex items-center">
-                        <span class="mr-2">←</span>
-                        Voltar
+    <!-- Preset Detail Modal -->
+    <div id="presetModal" class="fixed inset-0 bg-black/50 modal-backdrop z-50 hidden">
+        <div class="h-full flex flex-col">
+            <!-- Modal Header -->
+            <div class="bg-white/10 backdrop-blur-md border-b border-white/20 px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <button onclick="closePreset()" class="text-white/70 hover:text-white">
+                        <span class="text-lg">← Voltar</span>
                     </button>
-                    <button class="text-white/70 hover:text-white">
-                        <span>❤️</span>
-                    </button>
+                    <h2 id="presetTitle" class="text-white font-semibold">Skin Perfection</h2>
+                    <button onclick="savePreset()" class="text-blue-400 font-medium">Salvar</button>
+                </div>
+            </div>
+
+            <!-- Photo Preview -->
+            <div class="flex-1 p-4">
+                <div class="bg-white/5 rounded-2xl p-4 mb-6">
+                    <div class="before-after photo-frame rounded-xl mx-auto max-w-sm relative">
+                        <div class="w-full h-full bg-gradient-to-br from-gray-300 to-gray-500 rounded-xl flex items-center justify-center">
+                            <span class="text-gray-600 text-sm">Foto Original</span>
+                        </div>
+                        <div class="after-overlay">
+                            <div id="presetPreview" class="w-full h-full bg-gradient-to-br from-gray-300 to-gray-500 rounded-xl flex items-center justify-center filter-preview">
+                                <span class="text-gray-600 text-sm">Com Preset</span>
+                            </div>
+                        </div>
+                        <div class="divider-line"></div>
+                    </div>
                 </div>
 
-                <!-- Content -->
-                <div class="p-6">
-                    <div class="text-center mb-6">
-                        <div id="presetIcon" class="text-6xl mb-4">🌅</div>
-                        <h2 id="presetName" class="text-2xl font-bold text-white mb-2">Golden Hour</h2>
-                        <p id="presetSubtitle" class="text-white/70 mb-4">Perfeito para fotos durante o pôr do sol</p>
-                        <div id="presetPrice" class="text-3xl font-bold text-green-400">GRÁTIS</div>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-white mb-3">Descrição</h3>
-                        <p id="presetDescription" class="text-white/80 leading-relaxed">
-                            Realça tons dourados e cria uma atmosfera mágica nas suas fotos. Ideal para retratos e paisagens durante a golden hour.
-                        </p>
-                    </div>
-
-                    <!-- Features -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-white mb-3">Características</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center text-white/80">
-                                <span class="mr-2">✅</span>
-                                Compatível com iPhone
-                            </div>
-                            <div class="flex items-center text-white/80">
-                                <span class="mr-2">✅</span>
-                                Fácil instalação
-                            </div>
-                            <div class="flex items-center text-white/80">
-                                <span class="mr-2">✅</span>
-                                Suporte técnico incluído
-                            </div>
-                            <div class="flex items-center text-white/80">
-                                <span class="mr-2">✅</span>
-                                Atualizações gratuitas
-                            </div>
+                <!-- Preset Info -->
+                <div class="ios-card rounded-2xl p-4 mb-4">
+                    <div class="flex items-center mb-3">
+                        <span id="presetIcon" class="text-2xl mr-3">✨</span>
+                        <div>
+                            <h3 id="presetName" class="text-white font-semibold">Skin Perfection</h3>
+                            <p id="presetCategory" class="text-white/70 text-sm">Retrato Profissional</p>
                         </div>
                     </div>
+                    <p id="presetDescription" class="text-white/80 text-sm leading-relaxed">
+                        Suaviza a pele mantendo detalhes naturais
+                    </p>
+                </div>
 
-                    <!-- Preview Images -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-white mb-3">Preview</h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-white/5 rounded-xl h-32 flex items-center justify-center border border-white/10">
-                                <span class="text-white/50">Antes</span>
-                            </div>
-                            <div class="bg-white/5 rounded-xl h-32 flex items-center justify-center border border-white/10">
-                                <span class="text-white/50">Depois</span>
-                            </div>
-                        </div>
+                <!-- Intensity Control -->
+                <div class="ios-card rounded-2xl p-4 mb-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-white font-medium">Intensidade</span>
+                        <span id="intensityValue" class="text-white/70">50%</span>
                     </div>
+                    <input type="range" id="intensitySlider" class="intensity-slider w-full" 
+                           min="0" max="100" value="50" oninput="updateIntensity(this.value)">
+                </div>
 
-                    <!-- Download Button -->
-                    <button onclick="downloadPreset()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-4 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105">
-                        Baixar Grátis
+                <!-- Action Buttons -->
+                <div class="space-y-3">
+                    <button onclick="applyPreset()" class="ios-button w-full text-white font-semibold py-4 rounded-2xl">
+                        Aplicar Preset
                     </button>
-
-                    <!-- Share Button -->
-                    <button onclick="sharePreset()" class="w-full mt-3 bg-white/10 backdrop-blur-md border border-white/20 text-white font-medium py-3 rounded-xl hover:bg-white/20 transition-all duration-300">
+                    <button onclick="sharePreset()" class="ios-card w-full text-white font-medium py-3 rounded-2xl border border-white/20">
                         Compartilhar
                     </button>
                 </div>
@@ -384,7 +327,31 @@
         </div>
     </div>
 
+    <!-- Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20">
+        <div class="flex justify-around py-2">
+            <button class="flex flex-col items-center py-2 px-4 text-white">
+                <span class="text-xl mb-1">🏠</span>
+                <span class="text-xs">Início</span>
+            </button>
+            <button class="flex flex-col items-center py-2 px-4 text-white/60">
+                <span class="text-xl mb-1">❤️</span>
+                <span class="text-xs">Favoritos</span>
+            </button>
+            <button class="flex flex-col items-center py-2 px-4 text-white/60">
+                <span class="text-xl mb-1">📁</span>
+                <span class="text-xs">Meus Presets</span>
+            </button>
+            <button class="flex flex-col items-center py-2 px-4 text-white/60">
+                <span class="text-xl mb-1">⚙️</span>
+                <span class="text-xs">Configurações</span>
+            </button>
+        </div>
+    </div>
+
     <script>
+        let currentPreset = null;
+
         // Search functionality
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
@@ -400,29 +367,98 @@
             });
         });
 
-        // Show preset details
-        function showPresetDetails(name, icon, subtitle, price, description) {
+        // Category filtering
+        function filterCategory(category) {
+            const presetCards = document.querySelectorAll('.preset-card');
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            
+            // Update active button
+            categoryBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter presets
+            presetCards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Open preset detail
+        function openPreset(name, icon, category, description, filterColor, blendMode, opacity) {
+            currentPreset = { name, icon, category, description, filterColor, blendMode, opacity };
+            
+            document.getElementById('presetTitle').textContent = name;
             document.getElementById('presetName').textContent = name;
             document.getElementById('presetIcon').textContent = icon;
-            document.getElementById('presetSubtitle').textContent = subtitle;
-            document.getElementById('presetPrice').textContent = price;
+            document.getElementById('presetCategory').textContent = getCategoryName(category);
             document.getElementById('presetDescription').textContent = description;
-            document.getElementById('presetDetails').classList.remove('hidden');
+            
+            // Update preview
+            const preview = document.getElementById('presetPreview');
+            preview.style.setProperty('--filter-color', `linear-gradient(45deg, ${filterColor})`);
+            preview.style.setProperty('--blend-mode', blendMode);
+            preview.style.setProperty('--filter-opacity', opacity);
+            
+            document.getElementById('presetModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
 
-        // Hide preset details
-        function hidePresetDetails() {
-            document.getElementById('presetDetails').classList.add('hidden');
+        // Close preset detail
+        function closePreset() {
+            document.getElementById('presetModal').classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
 
-        // Download preset
-        function downloadPreset() {
+        // Update intensity
+        function updateIntensity(value) {
+            document.getElementById('intensityValue').textContent = value + '%';
+            const preview = document.getElementById('presetPreview');
+            const newOpacity = (value / 100) * parseFloat(currentPreset.opacity);
+            preview.style.setProperty('--filter-opacity', newOpacity.toString());
+        }
+
+        // Apply preset
+        function applyPreset() {
+            const presetName = document.getElementById('presetName').textContent;
+            const intensity = document.getElementById('intensitySlider').value;
+            
+            // Simulate applying preset
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 left-4 right-4 bg-green-500 text-white p-4 rounded-2xl z-60 text-center';
+            notification.innerHTML = `
+                <div class="flex items-center justify-center">
+                    <span class="mr-2">✅</span>
+                    Preset "${presetName}" aplicado com ${intensity}% de intensidade!
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+                closePreset();
+            }, 2000);
+        }
+
+        // Save preset
+        function savePreset() {
             const presetName = document.getElementById('presetName').textContent;
             
-            alert(`🎉 Download iniciado!\n\nPreset: ${presetName}\n\nO arquivo será baixado automaticamente. Verifique sua pasta de downloads e siga as instruções de instalação incluídas.`);
-            hidePresetDetails();
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 left-4 right-4 bg-blue-500 text-white p-4 rounded-2xl z-60 text-center';
+            notification.innerHTML = `
+                <div class="flex items-center justify-center">
+                    <span class="mr-2">💾</span>
+                    Preset "${presetName}" salvo nos favoritos!
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
         }
 
         // Share preset
@@ -431,32 +467,69 @@
             
             if (navigator.share) {
                 navigator.share({
-                    title: `Preset ${presetName} - PresetPro`,
+                    title: `Preset ${presetName} - PhotoPro`,
                     text: `Confira este preset incrível: ${presetName}`,
                     url: window.location.href
                 });
             } else {
-                // Fallback for browsers that don't support Web Share API
-                const shareText = `Confira este preset incrível: ${presetName} - PresetPro`;
+                const shareText = `Confira este preset incrível: ${presetName} - PhotoPro`;
                 navigator.clipboard.writeText(shareText).then(() => {
-                    alert('Link copiado para a área de transferência!');
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-20 left-4 right-4 bg-purple-500 text-white p-4 rounded-2xl z-60 text-center';
+                    notification.innerHTML = `
+                        <div class="flex items-center justify-center">
+                            <span class="mr-2">📋</span>
+                            Link copiado para compartilhar!
+                        </div>
+                    `;
+                    document.body.appendChild(notification);
+                    
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 2000);
                 });
             }
         }
 
-        // Close modal when clicking outside
-        document.getElementById('presetDetails').addEventListener('click', function(e) {
+        // Helper function
+        function getCategoryName(category) {
+            const names = {
+                'portrait': 'Retrato Profissional',
+                'landscape': 'Paisagem',
+                'vintage': 'Vintage',
+                'cinematic': 'Cinematográfico'
+            };
+            return names[category] || category;
+        }
+
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Close modal on backdrop click
+        document.getElementById('presetModal').addEventListener('click', function(e) {
             if (e.target === this) {
-                hidePresetDetails();
+                closePreset();
             }
         });
 
-        // Prevent scrolling when modal is open
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && !document.getElementById('presetDetails').classList.contains('hidden')) {
-                hidePresetDetails();
+        // Add haptic feedback simulation
+        function hapticFeedback() {
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
             }
+        }
+
+        // Add haptic feedback to buttons
+        document.querySelectorAll('button, .preset-card').forEach(element => {
+            element.addEventListener('touchstart', hapticFeedback);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96615590a5d6139e',t:'MTc1MzY3MzgwNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9661719513c9e83a',t:'MTc1MzY3NDk1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
