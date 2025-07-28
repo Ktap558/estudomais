@@ -1,328 +1,2030 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor de Imagem com Preset</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APP Tesoureiro</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- PDF.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
   <style>
-    .upload-area {
-      transition: all 0.3s ease;
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap');
+    
+    :root {
+      --primary-color: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #60a5fa;
+      --accent-color: #06b6d4;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --dark-bg: #111827;
+      --card-bg: #1f2937;
+      --light-text: #f3f4f6;
+      --border-radius: 0.5rem;
     }
-    .upload-area:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f1f5f9;
+      color: #1e293b;
+      overflow-x: hidden;
     }
+    
+    .tech-gradient {
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    }
+    
+    .tech-card {
+      @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-100;
+      backdrop-filter: blur(10px);
+    }
+    
+    .tech-header {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+    }
+    
+    .tech-header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath fill='%23ffffff' fill-opacity='0.05' d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z'%3E%3C/path%3E%3C/svg%3E");
+    }
+    
     .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      transition: all 0.3s ease;
+      @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-[1.02] shadow-md flex items-center justify-center;
     }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-    }
+    
     .btn-secondary {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      transition: all 0.3s ease;
+      @apply bg-gray-100 hover:bg-gray-200 text-blue-700 font-medium py-2 px-3 rounded-lg transition duration-300 ease-in-out border border-blue-700 flex items-center justify-center;
     }
-    .btn-secondary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+    
+    .btn-danger {
+      @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-3 rounded-lg transition duration-300 ease-in-out flex items-center justify-center;
     }
-    .canvas-container {
-      background: linear-gradient(45deg, #f0f2f5, #ffffff);
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    
+    .btn-success {
+      @apply bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-3 rounded-lg transition duration-300 ease-in-out flex items-center justify-center;
     }
-    canvas {
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-      max-width: 100%;
-      height: auto;
+    
+    .input-field {
+      @apply w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200;
     }
-    .preset-info {
-      background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-      border-radius: 15px;
-      padding: 15px;
-      margin: 20px 0;
-      color: #2d3748;
+    
+    .page {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #f1f5f9;
+      z-index: 50;
+      transform: translateX(100%);
+      transition: transform 0.4s ease-in-out;
+      overflow-y: auto;
+    }
+    
+    .page.active {
+      transform: translateX(0);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    .glow {
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+    }
+    
+    .tech-badge {
+      @apply inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full;
+    }
+    
+    .developer-credit {
+      @apply text-xs text-gray-400 text-center mt-4 opacity-60;
+    }
+    
+    .page-header {
+      @apply bg-gradient-to-r from-blue-600 to-blue-800 text-white py-4 px-4 flex justify-between items-center;
+    }
+    
+    .back-btn {
+      @apply bg-white bg-opacity-20 p-2 rounded-lg text-white hover:bg-opacity-30 transition-all;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .auth-container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .sync-badge {
+      @apply bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full flex items-center;
+    }
+    
+    /* Splash Screen Styles */
+    .splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.5s ease-out;
+    }
+    
+    .splash-logo {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 2rem;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+      animation: pulse 2s infinite;
+    }
+    
+    .splash-logo::before {
+      content: "";
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        transparent, 
+        rgba(59, 130, 246, 0.8), 
+        transparent 30%
+      );
+      animation: rotate 4s linear infinite;
+    }
+    
+    .splash-logo::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      background: #0f172a;
+      border-radius: 27px;
+      z-index: 1;
+    }
+    
+    .splash-logo-inner {
+      position: relative;
+      z-index: 2;
+      color: #fff;
+      font-size: 3rem;
+    }
+    
+    .splash-title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: white;
+      margin-bottom: 0.5rem;
+      letter-spacing: 2px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s ease-out forwards 0.5s;
+    }
+    
+    .splash-subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s ease-out forwards 0.7s;
+    }
+    
+    .splash-developer {
+      position: absolute;
+      bottom: 2rem;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      opacity: 0;
+      animation: fadeIn 1s ease-out forwards 1.5s;
+      text-align: center;
+    }
+    
+    .splash-developer strong {
+      display: block;
+      color: rgba(255, 255, 255, 0.9);
       font-weight: 500;
+      margin-top: 0.3rem;
+    }
+    
+    .splash-loading {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      animation: fadeIn 0.8s ease-out forwards 1s;
+    }
+    
+    .splash-loading-bar {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .splash-loading-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6, #06b6d4);
+      border-radius: 4px;
+      animation: loadingProgress 2.5s ease-out forwards;
+    }
+    
+    .splash-loading-text {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+    
+    .splash-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background-color: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      animation: particleFloat 15s infinite linear;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+      50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+      100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes loadingProgress {
+      0% { width: 0%; }
+      50% { width: 70%; }
+      80% { width: 85%; }
+      100% { width: 100%; }
+    }
+    
+    @keyframes particleFloat {
+      0% { transform: translateY(0) translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+    }
+    
+    .tech-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+      background-size: 30px 30px;
+      z-index: 0;
+    }
+    
+    .tech-circles {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 500px;
+      height: 500px;
+      z-index: 0;
+    }
+    
+    .tech-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(59, 130, 246, 0.1);
+      animation: circleExpand 4s ease-out infinite;
+    }
+    
+    .tech-circle:nth-child(1) {
+      width: 100px;
+      height: 100px;
+      animation-delay: 0s;
+    }
+    
+    .tech-circle:nth-child(2) {
+      width: 200px;
+      height: 200px;
+      animation-delay: 0.5s;
+    }
+    
+    .tech-circle:nth-child(3) {
+      width: 300px;
+      height: 300px;
+      animation-delay: 1s;
+    }
+    
+    .tech-circle:nth-child(4) {
+      width: 400px;
+      height: 400px;
+      animation-delay: 1.5s;
+    }
+    
+    .tech-circle:nth-child(5) {
+      width: 500px;
+      height: 500px;
+      animation-delay: 2s;
+    }
+    
+    @keyframes circleExpand {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      50% { opacity: 0.3; }
+      100% { transform: scale(1.2); opacity: 0; }
     }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-pink-100 font-sans">
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <!-- Header -->
-    <div class="text-center mb-8">
-      <h1 class="text-4xl font-bold text-gray-800 mb-2">✨ Editor de Imagem</h1>
-      <p class="text-gray-600 text-lg">Transforme suas fotos com nosso preset profissional</p>
-    </div>
+<body class="min-h-screen">
 
-    <!-- Upload Area -->
-    <div class="upload-area bg-white rounded-2xl p-8 mb-6 border-2 border-dashed border-gray-300 hover:border-purple-400">
-      <div class="text-center">
-        <div class="text-6xl mb-4">📸</div>
-        <label for="upload" class="cursor-pointer">
-          <span class="text-xl font-semibold text-gray-700 hover:text-purple-600">Clique para selecionar uma imagem</span>
-          <input type="file" id="upload" accept="image/*" class="hidden">
-        </label>
-        <p class="text-gray-500 mt-2">Suporta JPG, PNG e outros formatos</p>
-      </div>
-    </div>
-
-    <!-- Preset Options -->
-    <div class="grid md:grid-cols-3 gap-4 mb-8">
-      <div class="preset-info text-center">
-        <h3 class="font-bold text-lg mb-2">🏔️ Paisagem</h3>
-        <p class="text-sm">Realça natureza e céus</p>
-        <button onclick="aplicarPreset('paisagem')" class="btn-primary text-white font-bold py-3 px-6 rounded-full mt-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed preset-btn" disabled>
-          Aplicar
-        </button>
-      </div>
-      
-      <div class="preset-info text-center">
-        <h3 class="font-bold text-lg mb-2">🏠 Casa</h3>
-        <p class="text-sm">Perfeito para interiores</p>
-        <button onclick="aplicarPreset('casa')" class="btn-primary text-white font-bold py-3 px-6 rounded-full mt-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed preset-btn" disabled>
-          Aplicar
-        </button>
-      </div>
-      
-      <div class="preset-info text-center">
-        <h3 class="font-bold text-lg mb-2">✈️ Viagem</h3>
-        <p class="text-sm">Cores vibrantes e quentes</p>
-        <button onclick="aplicarPreset('viagem')" class="btn-primary text-white font-bold py-3 px-6 rounded-full mt-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed preset-btn" disabled>
-          Aplicar
-        </button>
-      </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="flex flex-wrap justify-center gap-4 mb-8">
-      <button onclick="resetarImagem()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300" id="resetBtn" disabled>
-        🔄 Resetar
-      </button>
-      <button onclick="baixarImagem()" class="btn-secondary text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" id="downloadBtn" disabled>
-        💾 Baixar Imagem
-      </button>
-    </div>
-
-    <!-- Canvas Container -->
-    <div class="canvas-container text-center" id="canvasContainer" style="display: none;">
-      <canvas id="canvas" class="max-w-full h-auto"></canvas>
-    </div>
-
-    <!-- Instructions -->
-    <div class="text-center mt-8 text-gray-600" id="instructions">
-      <p class="text-lg">👆 Comece selecionando uma imagem acima</p>
+<!-- Splash Screen -->
+<div id="splashScreen" class="splash-screen">
+  <div class="tech-grid"></div>
+  
+  <div class="tech-circles">
+    <div class="tech-circle"></div>
+    <div class="tech-circle"></div>
+    <div class="tech-circle"></div>
+    <div class="tech-circle"></div>
+    <div class="tech-circle"></div>
+  </div>
+  
+  <div class="splash-particles" id="particles"></div>
+  
+  <div class="splash-logo">
+    <div class="splash-logo-inner">
+      <i class="fas fa-chart-line"></i>
     </div>
   </div>
+  
+  <h1 class="splash-title">APP TESOUREIRO</h1>
+  <p class="splash-subtitle">Gestão financeira inteligente</p>
+  
+  <div class="splash-loading">
+    <div>
+      <div class="splash-loading-bar">
+        <div class="splash-loading-progress"></div>
+      </div>
+      <div class="splash-loading-text">Carregando recursos...</div>
+    </div>
+  </div>
+  
+  <div class="splash-developer">
+    Desenvolvido por
+    <strong>Calisthenys Rodrigues</strong>
+  </div>
+</div>
 
-  <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const canvasContainer = document.getElementById('canvasContainer');
-    const instructions = document.getElementById('instructions');
-    const presetBtns = document.querySelectorAll('.preset-btn');
-    const resetBtn = document.getElementById('resetBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-    let img = new Image();
-    let originalImageData = null;
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay hidden">
+  <div class="spinner"></div>
+</div>
 
-    // Preset configurations
-    const presets = {
-      paisagem: {
-        brilho: 10,
-        contraste: 1.2,
-        saturacao: 1.3,
-        nitidez: 1.1,
-        calidez: -5,
-        sombras: -10,
-        altasLuzes: -5
-      },
-      casa: {
-        brilho: 15,
-        contraste: 1.05,
-        saturacao: 1.1,
-        calidez: -10,
-        nitidez: 1.05,
-        sombras: 5,
-        altasLuzes: -10
-      },
-      viagem: {
-        brilho: -5,
-        contraste: 1.3,
-        saturacao: 1.2,
-        calidez: 10,
-        nitidez: 1.15,
-        sombras: -15,
-        altasLuzes: -20
-      }
-    };
+<!-- Login Page -->
+<div id="loginPage" class="min-h-screen flex items-center justify-center py-12 px-4 hidden">
+  <div class="auth-container bg-white rounded-lg shadow-xl p-8 w-full">
+    <div class="text-center mb-8">
+      <div class="bg-blue-600 text-white rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-chart-line text-3xl"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-800">APP Tesoureiro</h2>
+      <p class="text-gray-500 mt-1">Faça login para acessar seus relatórios</p>
+    </div>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Email</label>
+        <input type="email" id="email" class="input-field" placeholder="seu@email.com">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="password">Senha</label>
+        <input type="password" id="password" class="input-field" placeholder="********">
+      </div>
+      <div id="loginError" class="text-red-500 text-sm hidden"></div>
+      <button id="loginBtn" class="btn-primary w-full">
+        <i class="fas fa-sign-in-alt mr-2"></i> Entrar
+      </button>
+      <div class="text-center mt-4">
+        <p class="text-sm text-gray-600">Não tem uma conta?</p>
+        <button id="showRegisterBtn" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+          Criar nova conta
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    document.getElementById('upload').addEventListener('change', function (e) {
-      if (e.target.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (event) {
-          img.onload = function () {
-            // Set canvas size to fit the image while maintaining aspect ratio
-            const maxWidth = 800;
-            const maxHeight = 600;
-            let { width, height } = img;
-            
-            if (width > maxWidth) {
-              height = (height * maxWidth) / width;
-              width = maxWidth;
-            }
-            if (height > maxHeight) {
-              width = (width * maxHeight) / height;
-              height = maxHeight;
-            }
-            
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            // Store original image data
-            originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            
-            // Show canvas and enable buttons
-            canvasContainer.style.display = 'block';
-            instructions.style.display = 'none';
-            presetBtns.forEach(btn => btn.disabled = false);
-            resetBtn.disabled = false;
-            downloadBtn.disabled = false;
-          }
-          img.src = event.target.result;
-        }
-        reader.readAsDataURL(e.target.files[0]);
-      }
-    });
+<!-- Register Page -->
+<div id="registerPage" class="min-h-screen flex items-center justify-center py-12 px-4 hidden">
+  <div class="auth-container bg-white rounded-lg shadow-xl p-8 w-full">
+    <div class="text-center mb-8">
+      <div class="bg-blue-600 text-white rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-user-plus text-3xl"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-800">Criar Conta</h2>
+      <p class="text-gray-500 mt-1">Registre-se para começar a usar o APP</p>
+    </div>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="registerName">Nome</label>
+        <input type="text" id="registerName" class="input-field" placeholder="Seu nome completo">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="registerEmail">Email</label>
+        <input type="email" id="registerEmail" class="input-field" placeholder="seu@email.com">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="registerPassword">Senha</label>
+        <input type="password" id="registerPassword" class="input-field" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="confirmPassword">Confirmar Senha</label>
+        <input type="password" id="confirmPassword" class="input-field" placeholder="Confirme sua senha">
+      </div>
+      <div id="registerError" class="text-red-500 text-sm hidden"></div>
+      <button id="registerBtn" class="btn-primary w-full">
+        <i class="fas fa-user-plus mr-2"></i> Criar Conta
+      </button>
+      <div class="text-center mt-4">
+        <p class="text-sm text-gray-600">Já tem uma conta?</p>
+        <button id="showLoginBtn" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+          Fazer login
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    function aplicarPreset(presetType) {
-      if (!originalImageData || !presets[presetType]) return;
+<!-- Página Principal -->
+<div id="mainPage" class="main-page hidden">
+  <header class="tech-header text-white py-8 px-4 relative">
+    <div class="container mx-auto text-center relative z-10">
+      <div class="flex justify-center items-center mb-2">
+        <div class="bg-white bg-opacity-20 p-3 rounded-full mr-3">
+          <i class="fas fa-chart-line text-3xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold tracking-wider">APP TESOUREIRO</h1>
+          <p class="text-blue-100 text-sm">Gestão financeira inteligente</p>
+        </div>
+      </div>
       
-      const preset = presets[presetType];
+      <div class="flex justify-center mt-6 space-x-2">
+        <div class="tech-badge bg-blue-700 text-white">
+          <i class="fas fa-database mr-1"></i> Firebase
+        </div>
+        <div class="tech-badge bg-blue-700 text-white">
+          <i class="fas fa-file-pdf mr-1"></i> PDF Export
+        </div>
+        <div class="tech-badge bg-blue-700 text-white">
+          <i class="fas fa-chart-bar mr-1"></i> Analytics
+        </div>
+      </div>
       
-      // Create a copy of the original image data
-      const imageData = ctx.createImageData(originalImageData);
-      const data = imageData.data;
-      const originalData = originalImageData.data;
+      <div class="absolute top-4 right-4">
+        <div class="flex items-center">
+          <span id="userDisplayName" class="text-sm mr-3 hidden md:inline"></span>
+          <button id="logoutBtn" class="bg-white bg-opacity-20 p-2 rounded-lg text-white hover:bg-opacity-30 transition-all">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <svg class="absolute bottom-0 left-0 w-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+      <path fill="#f1f5f9" fill-opacity="1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,208C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+    </svg>
+  </header>
+
+  <div class="container mx-auto px-4 py-6 -mt-6 relative z-20">
+    <div class="flex justify-between items-center mb-4">
+      <div class="sync-badge">
+        <i class="fas fa-cloud-upload-alt mr-1"></i> Dados sincronizados
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <button id="btnNovoRelatorio" class="btn-primary">
+        <i class="fas fa-plus-circle mr-2"></i> NOVO RELATÓRIO
+      </button>
+      <button id="btnMostrarRelatorios" class="btn-primary">
+        <i class="fas fa-list-alt mr-2"></i> MOSTRAR RELATÓRIOS
+      </button>
+    </div>
+
+    <div id="listaRelatorios" class="mt-6 space-y-4"></div>
+    
+    <div class="developer-credit">
+      Desenvolvido por Calisthenys Rodrigues
+    </div>
+  </div>
+</div>
+
+<!-- Página Novo Relatório -->
+<div id="novoRelatorioPage" class="page">
+  <div class="page-header">
+    <button class="back-btn voltar-btn">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <h2 class="text-xl font-semibold">Novo Relatório</h2>
+    <div class="w-10"></div> <!-- Espaçador para centralizar o título -->
+  </div>
+  
+  <div class="container mx-auto px-4 py-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="mes">Mês</label>
+        <select id="mes" class="input-field">
+          <option value="">Selecione o mês</option>
+          <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
+          <option>Abril</option><option>Maio</option><option>Junho</option>
+          <option>Julho</option><option>Agosto</option><option>Setembro</option>
+          <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="ano">Ano</label>
+        <input type="number" id="ano" class="input-field" placeholder="Ex: 2023" min="2000" max="2100">
+      </div>
+      <div class="mb-6">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="tesoureiro">Tesoureiro(a)</label>
+        <input type="text" id="tesoureiro" class="input-field" placeholder="Nome do tesoureiro">
+      </div>
+      <button id="salvarRelatorio" class="btn-primary w-full">
+        <i class="fas fa-save mr-2"></i> Salvar Relatório
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Página Detalhes do Relatório -->
+<div id="detalhesPage" class="page">
+  <div class="page-header">
+    <button class="back-btn voltar-btn">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <h2 id="detalhesTitulo" class="text-xl font-semibold">Detalhes do Relatório</h2>
+    <div class="w-10"></div> <!-- Espaçador para centralizar o título -->
+  </div>
+  
+  <div class="container mx-auto px-4 py-6">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-4">
+      <div id="detalhesConteudo">
+        <!-- Conteúdo preenchido dinamicamente -->
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 mb-4">
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-semibold text-lg">Movimentações</h4>
+        <button id="adicionarMovimentacao" class="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+      <div id="listaMovimentacoes" class="space-y-3 max-h-96 overflow-y-auto">
+        <!-- Movimentações preenchidas dinamicamente -->
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-3 gap-3">
+      <button id="editarRelatorio" class="btn-secondary">
+        <i class="fas fa-edit mr-2"></i> Editar
+      </button>
+      <button id="gerarPDF" class="btn-success">
+        <i class="fas fa-file-pdf mr-2"></i> PDF
+      </button>
+      <button id="excluirRelatorio" class="btn-danger">
+        <i class="fas fa-trash-alt mr-2"></i> Excluir
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Página Adicionar/Editar Movimentação -->
+<div id="movimentacaoPage" class="page">
+  <div class="page-header">
+    <button class="back-btn voltar-btn">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <h2 id="movimentacaoTitulo" class="text-xl font-semibold">Nova Movimentação</h2>
+    <div class="w-10"></div> <!-- Espaçador para centralizar o título -->
+  </div>
+  
+  <div class="container mx-auto px-4 py-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="tipoMovimentacao">Tipo</label>
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" class="tipo-btn py-3 px-4 rounded-lg border border-gray-300 flex items-center justify-center" data-tipo="entrada">
+            <i class="fas fa-arrow-down text-green-600 mr-2"></i> Entrada
+          </button>
+          <button type="button" class="tipo-btn py-3 px-4 rounded-lg border border-gray-300 flex items-center justify-center" data-tipo="saida">
+            <i class="fas fa-arrow-up text-red-600 mr-2"></i> Saída
+          </button>
+        </div>
+        <input type="hidden" id="tipoMovimentacao" value="entrada">
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="categoriaMovimentacao">Categoria</label>
+        <select id="categoriaMovimentacao" class="input-field">
+          <option value="">Selecione uma categoria</option>
+          <option value="Dízimo">Dízimo</option>
+          <option value="Oferta">Oferta</option>
+          <option value="Voto">Voto</option>
+          <option value="Doação">Doação</option>
+          <option value="Despesa">Despesa</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div id="outroDescricaoContainer" class="mb-4 hidden">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="outroDescricao">Especifique</label>
+        <input type="text" id="outroDescricao" class="input-field" placeholder="Descreva a movimentação">
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" id="contribuinteLabel" for="contribuinteMovimentacao">Nome do Contribuinte</label>
+        <input type="text" id="contribuinteMovimentacao" class="input-field" placeholder="Nome da pessoa">
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="valorMovimentacao">Valor (R$)</label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">R$</span>
+          <input type="number" id="valorMovimentacao" class="input-field pl-10" placeholder="0,00" step="0.01" min="0">
+        </div>
+      </div>
+      <div class="mb-6">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="dataMovimentacao">Data</label>
+        <input type="date" id="dataMovimentacao" class="input-field">
+      </div>
+      <button id="salvarMovimentacao" class="btn-primary w-full">
+        <i class="fas fa-save mr-2"></i> Salvar Movimentação
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Página Editar Relatório -->
+<div id="editarRelatorioPage" class="page">
+  <div class="page-header">
+    <button class="back-btn voltar-btn">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <h2 class="text-xl font-semibold">Editar Relatório</h2>
+    <div class="w-10"></div> <!-- Espaçador para centralizar o título -->
+  </div>
+  
+  <div class="container mx-auto px-4 py-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="editMes">Mês</label>
+        <select id="editMes" class="input-field">
+          <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
+          <option>Abril</option><option>Maio</option><option>Junho</option>
+          <option>Julho</option><option>Agosto</option><option>Setembro</option>
+          <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="editAno">Ano</label>
+        <input type="number" id="editAno" class="input-field" min="2000" max="2100">
+      </div>
+      <div class="mb-6">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="editTesoureiro">Tesoureiro(a)</label>
+        <input type="text" id="editTesoureiro" class="input-field">
+      </div>
+      <button id="atualizarRelatorio" class="btn-primary w-full">
+        <i class="fas fa-save mr-2"></i> Atualizar Relatório
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Página Configurações do PDF -->
+<div id="pdfPage" class="page">
+  <div class="page-header">
+    <button class="back-btn voltar-btn">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <h2 class="text-xl font-semibold">Configurações do Relatório PDF</h2>
+    <div class="w-10"></div> <!-- Espaçador para centralizar o título -->
+  </div>
+  
+  <div class="container mx-auto px-4 py-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="nomeIgreja">Nome da Igreja</label>
+        <input type="text" id="nomeIgreja" class="input-field" placeholder="Ex: Igreja Evangélica">
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="enderecoIgreja">Endereço da Igreja</label>
+        <input type="text" id="enderecoIgreja" class="input-field" placeholder="Ex: Rua Principal, 123">
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="cidadeIgreja">Cidade/Estado</label>
+        <input type="text" id="cidadeIgreja" class="input-field" placeholder="Ex: São Paulo - SP">
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="pastorIgreja">Pastor(a)</label>
+        <input type="text" id="pastorIgreja" class="input-field" placeholder="Nome do pastor">
+      </div>
+      <div class="mb-6">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="incluirAssinatura">Incluir campo para assinatura</label>
+        <div class="flex items-center">
+          <input type="checkbox" id="incluirAssinatura" class="mr-2 h-5 w-5 text-blue-600" checked>
+          <label for="incluirAssinatura">Sim, incluir espaço para assinatura</label>
+        </div>
+      </div>
+      <div class="flex space-x-3">
+        <button id="gerarPDFDownload" class="btn-primary flex-1">
+          <i class="fas fa-download mr-2"></i> Baixar PDF
+        </button>
+        <button id="gerarPDFVisualizar" class="btn-secondary flex-1">
+          <i class="fas fa-eye mr-2"></i> Visualizar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Inicializar jsPDF
+  window.jsPDF = window.jspdf.jsPDF;
+  
+  // Inicializar Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyAQ_J85GRLfQ4I6ONWm_TeGxVTJsTS7Y1U",
+    authDomain: "apptesoureiro.firebaseapp.com",
+    projectId: "apptesoureiro",
+    storageBucket: "apptesoureiro.firebasestorage.app",
+    messagingSenderId: "461974709396",
+    appId: "1:461974709396:web:5f5e29d2151847c6534081",
+    measurementId: "G-MR0PLFLLD1"
+  };
+  
+  // Inicializar Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+  const analytics = firebase.analytics();
+  
+  // Armazenamento de dados
+  let relatorios = [];
+  let relatorioAtualIndex = -1;
+  let movimentacaoAtualIndex = -1;
+  let configIgreja = {
+    nome: '',
+    endereco: '',
+    cidade: '',
+    pastor: '',
+    incluirAssinatura: true
+  };
+  let currentUser = null;
+  
+  // Elementos DOM - Páginas
+  const splashScreen = document.getElementById('splashScreen');
+  const loginPage = document.getElementById('loginPage');
+  const registerPage = document.getElementById('registerPage');
+  const mainPage = document.getElementById('mainPage');
+  const novoRelatorioPage = document.getElementById('novoRelatorioPage');
+  const detalhesPage = document.getElementById('detalhesPage');
+  const movimentacaoPage = document.getElementById('movimentacaoPage');
+  const editarRelatorioPage = document.getElementById('editarRelatorioPage');
+  const pdfPage = document.getElementById('pdfPage');
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  
+  // Outros elementos DOM
+  const listaRelatorios = document.getElementById('listaRelatorios');
+  const categoriaMovimentacao = document.getElementById('categoriaMovimentacao');
+  const outroDescricaoContainer = document.getElementById('outroDescricaoContainer');
+  const tipoMovimentacao = document.getElementById('tipoMovimentacao');
+  const contribuinteLabel = document.getElementById('contribuinteLabel');
+  const userDisplayName = document.getElementById('userDisplayName');
+  
+  // Criar partículas para o splash screen
+  function createParticles() {
+    const particlesContainer = document.getElementById('particles');
+    const numParticles = 50;
+    
+    for (let i = 0; i < numParticles; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
       
-      // Copy original data
-      for (let i = 0; i < data.length; i++) {
-        data[i] = originalData[i];
-      }
-
-      for (let i = 0; i < data.length; i += 4) {
-        let r = data[i];
-        let g = data[i + 1];
-        let b = data[i + 2];
-
-        // Aplicar brilho
-        r += preset.brilho;
-        g += preset.brilho;
-        b += preset.brilho;
-
-        // Aplicar contraste
-        r = ((r - 128) * preset.contraste + 128);
-        g = ((g - 128) * preset.contraste + 128);
-        b = ((b - 128) * preset.contraste + 128);
-
-        // Aplicar saturação
-        const gray = 0.3 * r + 0.59 * g + 0.11 * b;
-        r = gray + (r - gray) * preset.saturacao;
-        g = gray + (g - gray) * preset.saturacao;
-        b = gray + (b - gray) * preset.saturacao;
-
-        // Aplicar calidez (ajustar temperatura de cor)
-        if (preset.calidez > 0) {
-          r += preset.calidez;
-          b -= preset.calidez * 0.5;
-        } else {
-          r += preset.calidez;
-          b -= preset.calidez;
-        }
-
-        // Aplicar ajustes de sombras e altas luzes
-        const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-        if (luminance < 128) {
-          // Sombras
-          const factor = preset.sombras / 100;
-          r += r * factor;
-          g += g * factor;
-          b += b * factor;
-        } else {
-          // Altas luzes
-          const factor = preset.altasLuzes / 100;
-          r += (255 - r) * factor;
-          g += (255 - g) * factor;
-          b += (255 - b) * factor;
-        }
-
-        // Garantir que os valores estejam no range 0-255
-        data[i] = Math.max(0, Math.min(255, r));
-        data[i + 1] = Math.max(0, Math.min(255, g));
-        data[i + 2] = Math.max(0, Math.min(255, b));
-      }
-
-      ctx.putImageData(imageData, 0, 0);
+      // Posição aleatória
+      const posX = Math.random() * 100;
+      const posY = Math.random() * 100;
+      const size = Math.random() * 3 + 1;
+      const opacity = Math.random() * 0.5 + 0.3;
+      const animationDuration = Math.random() * 20 + 10;
+      const animationDelay = Math.random() * 5;
       
-      // Add visual feedback
-      const clickedBtn = event.target;
-      const originalText = clickedBtn.innerHTML;
-      clickedBtn.innerHTML = '✅ Aplicado!';
-      setTimeout(() => {
-        clickedBtn.innerHTML = originalText;
-      }, 2000);
+      particle.style.left = `${posX}%`;
+      particle.style.top = `${posY}%`;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      particle.style.opacity = opacity;
+      particle.style.animationDuration = `${animationDuration}s`;
+      particle.style.animationDelay = `${animationDelay}s`;
+      
+      particlesContainer.appendChild(particle);
     }
-
-    function baixarImagem() {
-      const link = document.createElement('a');
-      link.download = 'imagem-editada.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      
-      // Add visual feedback
-      downloadBtn.innerHTML = '✅ Baixado!';
-      setTimeout(() => {
-        downloadBtn.innerHTML = '💾 Baixar Imagem';
-      }, 2000);
+  }
+  
+  // Funções de autenticação
+  function showLoading() {
+    loadingOverlay.classList.remove('hidden');
+  }
+  
+  function hideLoading() {
+    loadingOverlay.classList.add('hidden');
+  }
+  
+  function hideSplashScreen() {
+    splashScreen.style.opacity = '0';
+    setTimeout(() => {
+      splashScreen.style.display = 'none';
+    }, 500);
+  }
+  
+  function showLoginPage() {
+    loginPage.classList.remove('hidden');
+    registerPage.classList.add('hidden');
+    mainPage.classList.add('hidden');
+  }
+  
+  function showRegisterPage() {
+    loginPage.classList.add('hidden');
+    registerPage.classList.remove('hidden');
+    mainPage.classList.add('hidden');
+  }
+  
+  function showMainPage() {
+    loginPage.classList.add('hidden');
+    registerPage.classList.add('hidden');
+    mainPage.classList.remove('hidden');
+  }
+  
+  async function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const loginError = document.getElementById('loginError');
+    
+    if (!email || !password) {
+      loginError.textContent = 'Por favor, preencha todos os campos.';
+      loginError.classList.remove('hidden');
+      return;
     }
-
-    // Reset functionality
-    function resetarImagem() {
-      if (originalImageData) {
-        ctx.putImageData(originalImageData, 0, 0);
+    
+    showLoading();
+    
+    try {
+      await auth.signInWithEmailAndPassword(email, password);
+      loginError.classList.add('hidden');
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+    } catch (error) {
+      loginError.textContent = traduzirErroFirebase(error.code);
+      loginError.classList.remove('hidden');
+      hideLoading();
+    }
+  }
+  
+  async function register() {
+    const name = document.getElementById('registerName').value;
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const registerError = document.getElementById('registerError');
+    
+    if (!name || !email || !password || !confirmPassword) {
+      registerError.textContent = 'Por favor, preencha todos os campos.';
+      registerError.classList.remove('hidden');
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      registerError.textContent = 'As senhas não coincidem.';
+      registerError.classList.remove('hidden');
+      return;
+    }
+    
+    if (password.length < 6) {
+      registerError.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+      registerError.classList.remove('hidden');
+      return;
+    }
+    
+    showLoading();
+    
+    try {
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      await userCredential.user.updateProfile({
+        displayName: name
+      });
+      
+      // Criar documento do usuário no Firestore
+      await db.collection('users').doc(userCredential.user.uid).set({
+        name: name,
+        email: email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      registerError.classList.add('hidden');
+      document.getElementById('registerName').value = '';
+      document.getElementById('registerEmail').value = '';
+      document.getElementById('registerPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      
+      // Recarregar para atualizar o displayName
+      await auth.currentUser.reload();
+    } catch (error) {
+      registerError.textContent = traduzirErroFirebase(error.code);
+      registerError.classList.remove('hidden');
+      hideLoading();
+    }
+  }
+  
+  async function logout() {
+    showLoading();
+    try {
+      await auth.signOut();
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      hideLoading();
+    }
+  }
+  
+  function traduzirErroFirebase(errorCode) {
+    switch (errorCode) {
+      case 'auth/email-already-in-use':
+        return 'Este email já está sendo usado por outra conta.';
+      case 'auth/invalid-email':
+        return 'Email inválido.';
+      case 'auth/user-disabled':
+        return 'Esta conta foi desativada.';
+      case 'auth/user-not-found':
+        return 'Usuário não encontrado.';
+      case 'auth/wrong-password':
+        return 'Senha incorreta.';
+      case 'auth/weak-password':
+        return 'A senha é muito fraca.';
+      default:
+        return 'Ocorreu um erro. Tente novamente.';
+    }
+  }
+  
+  // Funções de navegação entre páginas
+  function mostrarPagina(pagina) {
+    // Esconder todas as páginas
+    const todasPaginas = document.querySelectorAll('.page');
+    todasPaginas.forEach(p => p.classList.remove('active'));
+    
+    // Mostrar a página solicitada
+    pagina.classList.add('active');
+    
+    // Rolar para o topo
+    window.scrollTo(0, 0);
+  }
+  
+  function voltarParaPaginaAnterior() {
+    const paginaAtual = document.querySelector('.page.active');
+    if (paginaAtual) {
+      paginaAtual.classList.remove('active');
+    }
+  }
+  
+  // Funções do Firebase
+  async function carregarDados() {
+    showLoading();
+    
+    try {
+      // Carregar relatórios
+      const relatoriosSnapshot = await db.collection('users').doc(currentUser.uid)
+        .collection('relatorios').orderBy('dataCriacao', 'desc').get();
+      
+      relatorios = [];
+      relatoriosSnapshot.forEach(doc => {
+        const data = doc.data();
+        relatorios.push({
+          id: doc.id,
+          ...data
+        });
+      });
+      
+      // Carregar configurações da igreja
+      const configSnapshot = await db.collection('users').doc(currentUser.uid)
+        .collection('config').doc('igreja').get();
+      
+      if (configSnapshot.exists) {
+        configIgreja = configSnapshot.data();
+      }
+      
+      // Preencher campos de configuração
+      document.getElementById('nomeIgreja').value = configIgreja.nome || '';
+      document.getElementById('enderecoIgreja').value = configIgreja.endereco || '';
+      document.getElementById('cidadeIgreja').value = configIgreja.cidade || '';
+      document.getElementById('pastorIgreja').value = configIgreja.pastor || '';
+      document.getElementById('incluirAssinatura').checked = configIgreja.incluirAssinatura !== false;
+      
+      // Mostrar relatórios
+      mostrarRelatorios();
+      
+      hideLoading();
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      mostrarNotificacao('Erro ao carregar dados. Tente novamente.', 'error');
+      hideLoading();
+    }
+  }
+  
+  async function salvarDados() {
+    showLoading();
+    
+    try {
+      if (relatorioAtualIndex >= 0) {
+        const relatorio = relatorios[relatorioAtualIndex];
         
-        // Add visual feedback
-        resetBtn.innerHTML = '✅ Resetado!';
-        setTimeout(() => {
-          resetBtn.innerHTML = '🔄 Resetar';
-        }, 2000);
+        // Remover o ID antes de salvar
+        const { id, ...relatorioData } = relatorio;
+        
+        // Atualizar no Firestore
+        await db.collection('users').doc(currentUser.uid)
+          .collection('relatorios').doc(id).update(relatorioData);
       }
+      
+      hideLoading();
+    } catch (error) {
+      console.error('Erro ao salvar dados:', error);
+      mostrarNotificacao('Erro ao salvar dados. Tente novamente.', 'error');
+      hideLoading();
     }
-
-    // Add keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-      if (e.key === '1' && !presetBtns[0].disabled) {
-        aplicarPreset('paisagem');
-      }
-      if (e.key === '2' && !presetBtns[1].disabled) {
-        aplicarPreset('casa');
-      }
-      if (e.key === '3' && !presetBtns[2].disabled) {
-        aplicarPreset('viagem');
-      }
-      if (e.key === 'r' && !resetBtn.disabled) {
-        resetarImagem();
-      }
-      if (e.key === 's' && e.ctrlKey && !downloadBtn.disabled) {
-        e.preventDefault();
-        baixarImagem();
+  }
+  
+  async function salvarNovoRelatorio(relatorio) {
+    showLoading();
+    
+    try {
+      // Adicionar ao Firestore
+      const docRef = await db.collection('users').doc(currentUser.uid)
+        .collection('relatorios').add(relatorio);
+      
+      // Adicionar ID ao objeto local
+      relatorio.id = docRef.id;
+      
+      hideLoading();
+      return true;
+    } catch (error) {
+      console.error('Erro ao salvar novo relatório:', error);
+      mostrarNotificacao('Erro ao salvar relatório. Tente novamente.', 'error');
+      hideLoading();
+      return false;
+    }
+  }
+  
+  async function excluirRelatorioFirebase(index) {
+    showLoading();
+    
+    try {
+      const relatorio = relatorios[index];
+      
+      // Excluir do Firestore
+      await db.collection('users').doc(currentUser.uid)
+        .collection('relatorios').doc(relatorio.id).delete();
+      
+      // Remover do array local
+      relatorios.splice(index, 1);
+      
+      hideLoading();
+      return true;
+    } catch (error) {
+      console.error('Erro ao excluir relatório:', error);
+      mostrarNotificacao('Erro ao excluir relatório. Tente novamente.', 'error');
+      hideLoading();
+      return false;
+    }
+  }
+  
+  async function salvarConfigIgrejaFirebase() {
+    showLoading();
+    
+    try {
+      // Salvar no Firestore
+      await db.collection('users').doc(currentUser.uid)
+        .collection('config').doc('igreja').set(configIgreja);
+      
+      hideLoading();
+    } catch (error) {
+      console.error('Erro ao salvar configurações:', error);
+      mostrarNotificacao('Erro ao salvar configurações. Tente novamente.', 'error');
+      hideLoading();
+    }
+  }
+  
+  // Inicialização
+  document.addEventListener('DOMContentLoaded', () => {
+    // Criar partículas para o splash screen
+    createParticles();
+    
+    // Mostrar splash screen por 3 segundos
+    setTimeout(() => {
+      // Verificar estado de autenticação
+      auth.onAuthStateChanged(async (user) => {
+        hideSplashScreen();
+        
+        if (user) {
+          currentUser = user;
+          userDisplayName.textContent = user.displayName || user.email;
+          showMainPage();
+          await carregarDados();
+        } else {
+          currentUser = null;
+          showLoginPage();
+        }
+        hideLoading();
+      });
+    }, 3000);
+    
+    // Definir data atual para o campo de data
+    document.getElementById('dataMovimentacao').valueAsDate = new Date();
+    
+    // Configurar ano atual como padrão
+    document.getElementById('ano').value = new Date().getFullYear();
+    
+    // Mostrar/ocultar campo de descrição personalizada
+    categoriaMovimentacao.addEventListener('change', () => {
+      if (categoriaMovimentacao.value === 'Outro') {
+        outroDescricaoContainer.classList.remove('hidden');
+      } else {
+        outroDescricaoContainer.classList.add('hidden');
       }
     });
-  </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96618da3162bf1e2',t:'MTc1MzY3NjEwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    
+    // Configurar botões de tipo de movimentação
+    document.querySelectorAll('.tipo-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tipo-btn').forEach(b => {
+          b.classList.remove('bg-blue-100', 'border-blue-500');
+        });
+        
+        btn.classList.add('bg-blue-100', 'border-blue-500');
+        const tipo = btn.getAttribute('data-tipo');
+        document.getElementById('tipoMovimentacao').value = tipo;
+        
+        // Atualizar label do campo de contribuinte
+        if (tipo === 'entrada') {
+          contribuinteLabel.textContent = 'Nome do Contribuinte';
+        } else {
+          contribuinteLabel.textContent = 'Nome do Beneficiário';
+        }
+      });
+    });
+    
+    // Selecionar o primeiro botão de tipo por padrão
+    document.querySelector('.tipo-btn[data-tipo="entrada"]').click();
+    
+    // Configurar botões de voltar
+    document.querySelectorAll('.voltar-btn').forEach(btn => {
+      btn.addEventListener('click', voltarParaPaginaAnterior);
+    });
+    
+    // Configurar botões de autenticação
+    document.getElementById('loginBtn').addEventListener('click', login);
+    document.getElementById('registerBtn').addEventListener('click', register);
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('showRegisterBtn').addEventListener('click', showRegisterPage);
+    document.getElementById('showLoginBtn').addEventListener('click', showLoginPage);
+  });
+  
+  // Event Listeners
+  document.getElementById('btnNovoRelatorio').addEventListener('click', () => {
+    document.getElementById('mes').selectedIndex = 0;
+    document.getElementById('ano').value = new Date().getFullYear();
+    document.getElementById('tesoureiro').value = '';
+    mostrarPagina(novoRelatorioPage);
+  });
+  
+  document.getElementById('btnMostrarRelatorios').addEventListener('click', mostrarRelatorios);
+  
+  document.getElementById('salvarRelatorio').addEventListener('click', async () => {
+    const mes = document.getElementById('mes').value;
+    const ano = document.getElementById('ano').value;
+    const tesoureiro = document.getElementById('tesoureiro').value;
+    
+    if (!mes || !ano || !tesoureiro) {
+      mostrarNotificacao('Por favor, preencha todos os campos!', 'error');
+      return;
+    }
+    
+    const novoRelatorio = {
+      mes,
+      ano,
+      tesoureiro,
+      movimentacoes: [],
+      dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    const sucesso = await salvarNovoRelatorio(novoRelatorio);
+    
+    if (sucesso) {
+      relatorios.unshift(novoRelatorio); // Adicionar ao início do array
+      voltarParaPaginaAnterior();
+      mostrarRelatorios();
+      mostrarNotificacao('Relatório criado com sucesso!', 'success');
+    }
+  });
+  
+  document.getElementById('adicionarMovimentacao').addEventListener('click', () => {
+    document.getElementById('tipoMovimentacao').value = 'entrada';
+    document.getElementById('categoriaMovimentacao').selectedIndex = 0;
+    document.getElementById('outroDescricao').value = '';
+    document.getElementById('contribuinteMovimentacao').value = '';
+    document.getElementById('valorMovimentacao').value = '';
+    document.getElementById('dataMovimentacao').valueAsDate = new Date();
+    document.getElementById('movimentacaoTitulo').textContent = 'Nova Movimentação';
+    outroDescricaoContainer.classList.add('hidden');
+    movimentacaoAtualIndex = -1;
+    
+    // Resetar botões de tipo
+    document.querySelector('.tipo-btn[data-tipo="entrada"]').click();
+    
+    mostrarPagina(movimentacaoPage);
+  });
+  
+  document.getElementById('salvarMovimentacao').addEventListener('click', salvarMovimentacao);
+  
+  document.getElementById('editarRelatorio').addEventListener('click', () => {
+    const relatorio = relatorios[relatorioAtualIndex];
+    document.getElementById('editMes').value = relatorio.mes;
+    document.getElementById('editAno').value = relatorio.ano;
+    document.getElementById('editTesoureiro').value = relatorio.tesoureiro;
+    mostrarPagina(editarRelatorioPage);
+  });
+  
+  document.getElementById('atualizarRelatorio').addEventListener('click', atualizarRelatorio);
+  
+  document.getElementById('excluirRelatorio').addEventListener('click', async () => {
+    if (confirm("Deseja realmente excluir este relatório?")) {
+      const sucesso = await excluirRelatorioFirebase(relatorioAtualIndex);
+      
+      if (sucesso) {
+        voltarParaPaginaAnterior();
+        mostrarRelatorios();
+        mostrarNotificacao('Relatório excluído com sucesso!', 'success');
+      }
+    }
+  });
+  
+  document.getElementById('gerarPDF').addEventListener('click', () => {
+    mostrarPagina(pdfPage);
+  });
+  
+  document.getElementById('gerarPDFDownload').addEventListener('click', async () => {
+    await salvarConfigPDF();
+    gerarPDF('download');
+    voltarParaPaginaAnterior();
+  });
+  
+  document.getElementById('gerarPDFVisualizar').addEventListener('click', async () => {
+    await salvarConfigPDF();
+    gerarPDF('visualizar');
+    voltarParaPaginaAnterior();
+  });
+  
+  // Funções principais
+  function mostrarRelatorios() {
+    listaRelatorios.innerHTML = '';
+    
+    if (relatorios.length === 0) {
+      listaRelatorios.innerHTML = `
+        <div class="text-center py-10">
+          <div class="bg-blue-50 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-folder-open text-blue-400 text-4xl"></i>
+          </div>
+          <p class="text-gray-700 text-lg font-medium">Nenhum relatório encontrado</p>
+          <p class="text-gray-500 mt-2">Clique em "NOVO RELATÓRIO" para começar</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // Agrupar por ano
+    const relatoriosPorAno = {};
+    relatorios.forEach(relatorio => {
+      if (!relatoriosPorAno[relatorio.ano]) {
+        relatoriosPorAno[relatorio.ano] = [];
+      }
+      relatoriosPorAno[relatorio.ano].push(relatorio);
+    });
+    
+    // Criar seções por ano
+    Object.keys(relatoriosPorAno).sort((a, b) => b - a).forEach(ano => {
+      const relatoriosDoAno = relatoriosPorAno[ano];
+      
+      const secaoAno = document.createElement('div');
+      secaoAno.className = 'mb-8';
+      secaoAno.innerHTML = `
+        <div class="flex items-center mb-4">
+          <div class="bg-blue-100 rounded-lg p-2 mr-3">
+            <i class="fas fa-calendar-alt text-blue-600"></i>
+          </div>
+          <h2 class="text-xl font-bold text-gray-800">${ano}</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relatorios-container"></div>
+      `;
+      
+      const container = secaoAno.querySelector('.relatorios-container');
+      
+      relatoriosDoAno.forEach((relatorio, index) => {
+        const globalIndex = relatorios.findIndex(r => r.id === relatorio.id);
+        
+        // Calcular saldo
+        let saldo = 0;
+        let totalEntradas = 0;
+        let totalSaidas = 0;
+        let totalDizimos = 0;
+        
+        if (relatorio.movimentacoes && relatorio.movimentacoes.length > 0) {
+          relatorio.movimentacoes.forEach(mov => {
+            if (mov.tipo === 'entrada') {
+              totalEntradas += parseFloat(mov.valor);
+              saldo += parseFloat(mov.valor);
+              
+              // Contabilizar dízimos para o fundo convencional
+              if (mov.categoria === 'Dízimo') {
+                totalDizimos += parseFloat(mov.valor);
+              }
+            } else {
+              totalSaidas += parseFloat(mov.valor);
+              saldo -= parseFloat(mov.valor);
+            }
+          });
+        }
+        
+        // Calcular fundo convencional (10% dos dízimos)
+        const fundoConvencional = totalDizimos * 0.1;
+        
+        const card = document.createElement('div');
+        card.className = 'tech-card hover:glow transition-all duration-300';
+        card.innerHTML = `
+          <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 flex justify-between items-center">
+            <h3 class="font-semibold text-lg">${relatorio.mes}</h3>
+            <span class="text-xs bg-white text-blue-800 px-2 py-1 rounded-full font-medium">${relatorio.ano}</span>
+          </div>
+          <div class="p-4">
+            <p class="text-gray-600 mb-3 flex items-center">
+              <i class="fas fa-user text-blue-500 mr-2"></i> ${relatorio.tesoureiro}
+            </p>
+            <div class="grid grid-cols-3 gap-2 mt-3 mb-4 text-center text-sm">
+              <div class="bg-green-50 p-2 rounded-lg border border-green-100">
+                <p class="text-green-800 text-xs font-medium">Entradas</p>
+                <p class="font-semibold text-green-600">R$ ${totalEntradas.toFixed(2).replace('.', ',')}</p>
+              </div>
+              <div class="bg-red-50 p-2 rounded-lg border border-red-100">
+                <p class="text-red-800 text-xs font-medium">Saídas</p>
+                <p class="font-semibold text-red-600">R$ ${totalSaidas.toFixed(2).replace('.', ',')}</p>
+              </div>
+              <div class="bg-blue-50 p-2 rounded-lg border border-blue-100">
+                <p class="text-blue-800 text-xs font-medium">Saldo</p>
+                <p class="font-semibold ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}">
+                  R$ ${saldo.toFixed(2).replace('.', ',')}
+                </p>
+              </div>
+            </div>
+            <button class="btn-primary w-full text-sm py-2 ver-detalhes" data-index="${globalIndex}">
+              <i class="fas fa-eye mr-2"></i> Ver Detalhes
+            </button>
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+      
+      listaRelatorios.appendChild(secaoAno);
+    });
+    
+    // Adicionar event listeners para os botões de detalhes
+    document.querySelectorAll('.ver-detalhes').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const index = parseInt(e.currentTarget.getAttribute('data-index'));
+        abrirDetalhes(index);
+      });
+    });
+  }
+  
+  function abrirDetalhes(index) {
+    relatorioAtualIndex = index;
+    const relatorio = relatorios[index];
+    
+    document.getElementById('detalhesTitulo').textContent = `${relatorio.mes}/${relatorio.ano}`;
+    
+    // Calcular saldo
+    let totalEntradas = 0;
+    let totalSaidas = 0;
+    let totalDizimos = 0;
+    let totalOfertas = 0;
+    let totalVotos = 0;
+    let totalDoacoes = 0;
+    
+    if (relatorio.movimentacoes && relatorio.movimentacoes.length > 0) {
+      relatorio.movimentacoes.forEach(mov => {
+        const valor = parseFloat(mov.valor);
+        if (mov.tipo === 'entrada') {
+          totalEntradas += valor;
+          
+          // Contabilizar por categoria
+          if (mov.categoria === 'Dízimo') totalDizimos += valor;
+          else if (mov.categoria === 'Oferta') totalOfertas += valor;
+          else if (mov.categoria === 'Voto') totalVotos += valor;
+          else if (mov.categoria === 'Doação') totalDoacoes += valor;
+        } else {
+          totalSaidas += valor;
+        }
+      });
+    }
+    
+    const saldo = totalEntradas - totalSaidas;
+    
+    // Calcular fundo convencional (10% dos dízimos)
+    const fundoConvencional = totalDizimos * 0.1;
+    
+    // Preencher detalhes
+    document.getElementById('detalhesConteudo').innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+          <p class="text-sm text-blue-800 font-medium">Tesoureiro</p>
+          <p class="font-semibold">${relatorio.tesoureiro}</p>
+        </div>
+        <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+          <p class="text-sm text-blue-800 font-medium">Período</p>
+          <p class="font-semibold">${relatorio.mes}/${relatorio.ano}</p>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-3 gap-2 text-center mb-4">
+        <div class="bg-green-50 p-3 rounded-lg border border-green-100">
+          <p class="text-sm text-green-800 font-medium">Entradas</p>
+          <p class="font-semibold text-green-600">R$ ${totalEntradas.toFixed(2).replace('.', ',')}</p>
+        </div>
+        <div class="bg-red-50 p-3 rounded-lg border border-red-100">
+          <p class="text-sm text-red-800 font-medium">Saídas</p>
+          <p class="font-semibold text-red-600">R$ ${totalSaidas.toFixed(2).replace('.', ',')}</p>
+        </div>
+        <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+          <p class="text-sm text-blue-800 font-medium">Saldo</p>
+          <p class="font-semibold ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}">
+            R$ ${saldo.toFixed(2).replace('.', ',')}
+          </p>
+        </div>
+      </div>
+      
+      <div class="bg-purple-50 p-3 rounded-lg border border-purple-100 mb-4">
+        <p class="text-sm text-purple-800 font-medium mb-1">Fundo Convencional (10% dos Dízimos)</p>
+        <p class="font-semibold text-purple-600">R$ ${fundoConvencional.toFixed(2).replace('.', ',')}</p>
+      </div>
+      
+      <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 mb-4">
+        <p class="text-sm text-blue-800 font-medium mb-2">Resumo de Entradas</p>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div class="flex justify-between">
+            <span>Dízimos:</span>
+            <span class="font-medium">R$ ${totalDizimos.toFixed(2).replace('.', ',')}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Ofertas:</span>
+            <span class="font-medium">R$ ${totalOfertas.toFixed(2).replace('.', ',')}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Votos:</span>
+            <span class="font-medium">R$ ${totalVotos.toFixed(2).replace('.', ',')}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Doações:</span>
+            <span class="font-medium">R$ ${totalDoacoes.toFixed(2).replace('.', ',')}</span>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    atualizarListaMovimentacoes();
+    mostrarPagina(detalhesPage);
+  }
+  
+  function atualizarListaMovimentacoes() {
+    const relatorio = relatorios[relatorioAtualIndex];
+    const listaMovimentacoes = document.getElementById('listaMovimentacoes');
+    listaMovimentacoes.innerHTML = '';
+    
+    if (!relatorio.movimentacoes || relatorio.movimentacoes.length === 0) {
+      listaMovimentacoes.innerHTML = `
+        <div class="text-center py-3">
+          <p class="text-gray-500">Nenhuma movimentação registrada</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // Ordenar movimentações por data (mais recentes primeiro)
+    const movimentacoesOrdenadas = [...relatorio.movimentacoes].sort((a, b) => {
+      return new Date(b.data) - new Date(a.data);
+    });
+    
+    movimentacoesOrdenadas.forEach((mov, idx) => {
+      const originalIndex = relatorio.movimentacoes.findIndex(m => 
+        m.descricao === mov.descricao && 
+        m.valor === mov.valor && 
+        m.data === mov.data &&
+        m.contribuinte === mov.contribuinte
+      );
+      
+      const data = new Date(mov.data);
+      const dataFormatada = `${data.getDate().toString().padStart(2, '0')}/${(data.getMonth() + 1).toString().padStart(2, '0')}/${data.getFullYear()}`;
+      
+      // Determinar a descrição a ser exibida
+      let descricaoExibida = mov.categoria;
+      if (mov.categoria === 'Outro' && mov.descricao) {
+        descricaoExibida = mov.descricao;
+      }
+      
+      const movItem = document.createElement('div');
+      movItem.className = `p-3 rounded-lg ${mov.tipo === 'entrada' ? 'bg-green-50 border border-green-100' : 'bg-red-50 border border-red-100'}`;
+      movItem.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="font-medium ${mov.tipo === 'entrada' ? 'text-green-700' : 'text-red-700'}">${descricaoExibida}</p>
+            <p class="text-xs text-gray-500 mt-1">${dataFormatada}</p>
+            <p class="text-sm mt-1">${mov.contribuinte || 'Não informado'}</p>
+          </div>
+          <div class="flex flex-col items-end">
+            <span class="font-semibold ${mov.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'} mb-2">
+              ${mov.tipo === 'entrada' ? '+' : '-'} R$ ${parseFloat(mov.valor).toFixed(2).replace('.', ',')}
+            </span>
+            <div class="flex space-x-1">
+              <button class="text-blue-600 hover:text-blue-800 editar-movimentacao p-1" data-index="${originalIndex}">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="text-red-600 hover:text-red-800 excluir-movimentacao p-1" data-index="${originalIndex}">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      listaMovimentacoes.appendChild(movItem);
+    });
+    
+    // Adicionar event listeners
+    document.querySelectorAll('.editar-movimentacao').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const index = parseInt(e.currentTarget.getAttribute('data-index'));
+        editarMovimentacao(index);
+      });
+    });
+    
+    document.querySelectorAll('.excluir-movimentacao').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const index = parseInt(e.currentTarget.getAttribute('data-index'));
+        excluirMovimentacao(index);
+      });
+    });
+  }
+  
+  async function salvarMovimentacao() {
+    const tipo = document.getElementById('tipoMovimentacao').value;
+    const categoria = document.getElementById('categoriaMovimentacao').value;
+    const outroDescricao = document.getElementById('outroDescricao').value;
+    const contribuinte = document.getElementById('contribuinteMovimentacao').value;
+    const valor = document.getElementById('valorMovimentacao').value;
+    const data = document.getElementById('dataMovimentacao').value;
+    
+    if (!categoria || !valor || !data) {
+      mostrarNotificacao('Por favor, preencha todos os campos obrigatórios!', 'error');
+      return;
+    }
+    
+    if (categoria === 'Outro' && !outroDescricao) {
+      mostrarNotificacao('Por favor, especifique a descrição da movimentação!', 'error');
+      return;
+    }
+    
+    const movimentacao = {
+      tipo,
+      categoria,
+      descricao: categoria === 'Outro' ? outroDescricao : '',
+      contribuinte,
+      valor,
+      data
+    };
+    
+    if (movimentacaoAtualIndex === -1) {
+      // Nova movimentação
+      if (!relatorios[relatorioAtualIndex].movimentacoes) {
+        relatorios[relatorioAtualIndex].movimentacoes = [];
+      }
+      relatorios[relatorioAtualIndex].movimentacoes.push(movimentacao);
+    } else {
+      // Editar movimentação existente
+      relatorios[relatorioAtualIndex].movimentacoes[movimentacaoAtualIndex] = movimentacao;
+    }
+    
+    await salvarDados();
+    voltarParaPaginaAnterior();
+    
+    // Atualizar detalhes
+    abrirDetalhes(relatorioAtualIndex);
+    
+    // Mostrar notificação
+    mostrarNotificacao('Movimentação salva com sucesso!', 'success');
+  }
+  
+  function editarMovimentacao(index) {
+    movimentacaoAtualIndex = index;
+    const movimentacao = relatorios[relatorioAtualIndex].movimentacoes[index];
+    
+    document.getElementById('tipoMovimentacao').value = movimentacao.tipo;
+    document.getElementById('categoriaMovimentacao').value = movimentacao.categoria;
+    document.getElementById('contribuinteMovimentacao').value = movimentacao.contribuinte || '';
+    document.getElementById('valorMovimentacao').value = movimentacao.valor;
+    document.getElementById('dataMovimentacao').value = movimentacao.data;
+    document.getElementById('movimentacaoTitulo').textContent = 'Editar Movimentação';
+    
+    // Selecionar o botão de tipo correto
+    document.querySelector(`.tipo-btn[data-tipo="${movimentacao.tipo}"]`).click();
+    
+    // Ajustar campo de descrição personalizada
+    if (movimentacao.categoria === 'Outro') {
+      outroDescricaoContainer.classList.remove('hidden');
+      document.getElementById('outroDescricao').value = movimentacao.descricao || '';
+    } else {
+      outroDescricaoContainer.classList.add('hidden');
+    }
+    
+    mostrarPagina(movimentacaoPage);
+  }
+  
+  async function excluirMovimentacao(index) {
+    if (confirm("Deseja realmente excluir esta movimentação?")) {
+      relatorios[relatorioAtualIndex].movimentacoes.splice(index, 1);
+      await salvarDados();
+      
+      // Atualizar detalhes
+      atualizarListaMovimentacoes();
+      
+      // Mostrar notificação
+      mostrarNotificacao('Movimentação excluída com sucesso!', 'success');
+    }
+  }
+  
+  async function atualizarRelatorio() {
+    const mes = document.getElementById('editMes').value;
+    const ano = document.getElementById('editAno').value;
+    const tesoureiro = document.getElementById('editTesoureiro').value;
+    
+    if (!mes || !ano || !tesoureiro) {
+      mostrarNotificacao('Por favor, preencha todos os campos!', 'error');
+      return;
+    }
+    
+    relatorios[relatorioAtualIndex].mes = mes;
+    relatorios[relatorioAtualIndex].ano = ano;
+    relatorios[relatorioAtualIndex].tesoureiro = tesoureiro;
+    
+    await salvarDados();
+    voltarParaPaginaAnterior();
+    
+    // Atualizar detalhes
+    abrirDetalhes(relatorioAtualIndex);
+    
+    // Atualizar lista
+    mostrarRelatorios();
+    
+    // Mostrar notificação
+    mostrarNotificacao('Relatório atualizado com sucesso!', 'success');
+  }
+  
+  async function salvarConfigPDF() {
+    configIgreja = {
+      nome: document.getElementById('nomeIgreja').value,
+      endereco: document.getElementById('enderecoIgreja').value,
+      cidade: document.getElementById('cidadeIgreja').value,
+      pastor: document.getElementById('pastorIgreja').value,
+      incluirAssinatura: document.getElementById('incluirAssinatura').checked
+    };
+    
+    await salvarConfigIgrejaFirebase();
+  }
+  
+  function gerarPDF(modo) {
+    const relatorio = relatorios[relatorioAtualIndex];
+    
+    // Criar novo documento PDF
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+    
+    // Configurações
+    const margemEsquerda = 20;
+    const margemDireita = 20;
+    const margemTopo = 20;
+    const larguraPagina = 210 - margemEsquerda - margemDireita;
+    
+    // Adicionar cabeçalho
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text(configIgreja.nome || 'Igreja', 105, margemTopo, { align: 'center' });
+    
+    if (configIgreja.endereco) {
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(configIgreja.endereco, 105, margemTopo + 7, { align: 'center' });
+    }
+    
+    if (configIgreja.cidade) {
+      doc.setFontSize(10);
+      doc.text(configIgreja.cidade, 105, margemTopo + 12, { align: 'center' });
+    }
+    
+    // Título do relatório
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`RELATÓRIO FINANCEIRO - ${relatorio.mes.toUpperCase()} / ${relatorio.ano}`, 105, margemTopo + 25, { align: 'center' });
+    
+    // Informações do relatório
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Tesoureiro: ${relatorio.tesoureiro}`, margemEsquerda, margemTopo + 35);
+    
+    if (configIgreja.pastor) {
+      doc.text(`Pastor: ${configIgreja.pastor}`, margemEsquerda, margemTopo + 42);
+    }
+    
+    // Calcular saldo
+    let totalEntradas = 0;
+    let totalSaidas = 0;
+    let totalDizimos = 0;
+    let totalOfertas = 0;
+    let totalVotos = 0;
+    let totalDoacoes = 0;
+    
+    if (relatorio.movimentacoes && relatorio.movimentacoes.length > 0) {
+      relatorio.movimentacoes.forEach(mov => {
+        const valor = parseFloat(mov.valor);
+        if (mov.tipo === 'entrada') {
+          totalEntradas += valor;
+          
+          // Contabilizar por categoria
+          if (mov.categoria === 'Dízimo') totalDizimos += valor;
+          else if (mov.categoria === 'Oferta') totalOfertas += valor;
+          else if (mov.categoria === 'Voto') totalVotos += valor;
+          else if (mov.categoria === 'Doação') totalDoacoes += valor;
+        } else {
+          totalSaidas += valor;
+        }
+      });
+    }
+    
+    const saldo = totalEntradas - totalSaidas;
+    
+    // Calcular fundo convencional (10% dos dízimos)
+    const fundoConvencional = totalDizimos * 0.1;
+    
+    // Resumo financeiro
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RESUMO FINANCEIRO', margemEsquerda, margemTopo + 55);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Total de Entradas: R$ ${totalEntradas.toFixed(2).replace('.', ',')}`, margemEsquerda, margemTopo + 62);
+    doc.text(`Total de Saídas: R$ ${totalSaidas.toFixed(2).replace('.', ',')}`, margemEsquerda, margemTopo + 68);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Saldo: R$ ${saldo.toFixed(2).replace('.', ',')}`, margemEsquerda, margemTopo + 76);
+    
+    // Fundo Convencional
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Fundo Convencional (10% dos Dízimos): R$ ${fundoConvencional.toFixed(2).replace('.', ',')}`, margemEsquerda, margemTopo + 84);
+    
+    // Detalhamento por categoria
+    doc.setFontSize(12);
+    doc.text('DETALHAMENTO POR CATEGORIA', margemEsquerda, margemTopo + 96);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Dízimos: R$ ${totalDizimos.toFixed(2).replace('.', ',')}`, margemEsquerda, margemTopo + 103);
+    doc.text(`Ofertas: R$ ${totalOfertas.toFixed(2).replace('.', ',')}`, margemEsquerda + 80, margemTopo + 103);
+    doc.text(`Votos: R$ ${totalVotos.toFixed(2).replace('.', ',')}`, margemEsquerda, margemTopo + 109);
+    doc.text(`Doações: R$ ${totalDoacoes.toFixed(2).replace('.', ',')}`, margemEsquerda + 80, margemTopo + 109);
+    
+    // Tabela de movimentações
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MOVIMENTAÇÕES DO PERÍODO', margemEsquerda, margemTopo + 123);
+    
+    // Preparar dados para a tabela
+    const tableData = [];
+    
+    if (relatorio.movimentacoes && relatorio.movimentacoes.length > 0) {
+      // Ordenar movimentações por data
+      const movimentacoesOrdenadas = [...relatorio.movimentacoes].sort((a, b) => {
+        return new Date(a.data) - new Date(b.data);
+      });
+      
+      movimentacoesOrdenadas.forEach(mov => {
+        const data = new Date(mov.data);
+        const dataFormatada = `${data.getDate().toString().padStart(2, '0')}/${(data.getMonth() + 1).toString().padStart(2, '0')}/${data.getFullYear()}`;
+        
+        // Determinar a descrição a ser exibida
+        let descricaoExibida = mov.categoria;
+        if (mov.categoria === 'Outro' && mov.descricao) {
+          descricaoExibida = mov.descricao;
+        }
+        
+        tableData.push([
+          dataFormatada,
+          descricaoExibida,
+          mov.contribuinte || '-',
+          mov.tipo === 'entrada' ? `R$ ${parseFloat(mov.valor).toFixed(2).replace('.', ',')}` : '-',
+          mov.tipo === 'saida' ? `R$ ${parseFloat(mov.valor).toFixed(2).replace('.', ',')}` : '-'
+        ]);
+      });
+    }
+    
+    // Adicionar tabela
+    doc.autoTable({
+      startY: margemTopo + 128,
+      head: [['Data', 'Descrição', 'Contribuinte/Beneficiário', 'Entrada', 'Saída']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [37, 99, 235],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold'
+      },
+      styles: {
+        fontSize: 9,
+        cellPadding: 3
+      },
+      columnStyles: {
+        0: { cellWidth: 25 },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 50 },
+        3: { cellWidth: 30 },
+        4: { cellWidth: 30 }
+      }
+    });
+    
+    // Adicionar assinatura se solicitado
+    if (configIgreja.incluirAssinatura) {
+      const finalY = doc.lastAutoTable.finalY + 20;
+      
+      doc.setFontSize(10);
+      doc.text('_'.repeat(30), 105, finalY, { align: 'center' });
+      doc.text(relatorio.tesoureiro, 105, finalY + 5, { align: 'center' });
+      doc.text('Tesoureiro(a)', 105, finalY + 10, { align: 'center' });
+    }
+    
+    // Adicionar rodapé
+    const pageCount = doc.internal.getNumberOfPages();
+    doc.setFontSize(8);
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.text(`Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} - Página ${i} de ${pageCount}`, 105, 287, { align: 'center' });
+      doc.text('APP Tesoureiro - Desenvolvido por Calisthenys Rodrigues', 105, 292, { align: 'center' });
+    }
+    
+    // Salvar ou visualizar o PDF
+    if (modo === 'download') {
+      doc.save(`Relatorio_${relatorio.mes}_${relatorio.ano}.pdf`);
+      mostrarNotificacao('PDF gerado com sucesso!', 'success');
+    } else {
+      // Abrir em nova aba
+      const pdfBlob = doc.output('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl, '_blank');
+    }
+  }
+  
+  // Funções auxiliares
+  function mostrarNotificacao(mensagem, tipo) {
+    // Remover notificações existentes
+    const notificacoesExistentes = document.querySelectorAll('.notificacao');
+    notificacoesExistentes.forEach(notif => {
+      notif.remove();
+    });
+    
+    // Criar nova notificação
+    const notificacao = document.createElement('div');
+    notificacao.className = `notificacao fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-500 ease-in-out ${
+      tipo === 'success' ? 'bg-emerald-500' : 'bg-red-500'
+    } text-white`;
+    
+    notificacao.innerHTML = `
+      <div class="flex items-center">
+        <i class="fas fa-${tipo === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+        <span>${mensagem}</span>
+      </div>
+    `;
+    
+    document.body.appendChild(notificacao);
+    
+    // Animar entrada
+    setTimeout(() => {
+      notificacao.classList.add('translate-y-0');
+      notificacao.classList.remove('translate-y-20');
+    }, 100);
+    
+    // Remover após 3 segundos
+    setTimeout(() => {
+      notificacao.classList.add('opacity-0', 'translate-y-2');
+      setTimeout(() => {
+        notificacao.remove();
+      }, 300);
+    }, 3000);
+  }
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96572109d5feadd3',t:'MTc1MzU2Njc5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
