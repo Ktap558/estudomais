@@ -71,16 +71,37 @@
       </div>
     </div>
 
-    <!-- Preset Info -->
-    <div class="preset-info text-center">
-      <h3 class="font-bold text-lg mb-2">🎨 Preset Profissional</h3>
-      <p>Brilho +20 • Contraste +15% • Saturação +10%</p>
+    <!-- Preset Options -->
+    <div class="grid md:grid-cols-3 gap-4 mb-8">
+      <div class="preset-info text-center">
+        <h3 class="font-bold text-lg mb-2">🏔️ Paisagem</h3>
+        <p class="text-sm">Realça natureza e céus</p>
+        <button onclick="aplicarPreset('paisagem')" class="btn-primary text-white font-bold py-3 px-6 rounded-full mt-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed preset-btn" disabled>
+          Aplicar
+        </button>
+      </div>
+      
+      <div class="preset-info text-center">
+        <h3 class="font-bold text-lg mb-2">🏠 Casa</h3>
+        <p class="text-sm">Perfeito para interiores</p>
+        <button onclick="aplicarPreset('casa')" class="btn-primary text-white font-bold py-3 px-6 rounded-full mt-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed preset-btn" disabled>
+          Aplicar
+        </button>
+      </div>
+      
+      <div class="preset-info text-center">
+        <h3 class="font-bold text-lg mb-2">✈️ Viagem</h3>
+        <p class="text-sm">Cores vibrantes e quentes</p>
+        <button onclick="aplicarPreset('viagem')" class="btn-primary text-white font-bold py-3 px-6 rounded-full mt-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed preset-btn" disabled>
+          Aplicar
+        </button>
+      </div>
     </div>
 
     <!-- Action Buttons -->
     <div class="flex flex-wrap justify-center gap-4 mb-8">
-      <button onclick="aplicarPreset()" class="btn-primary text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" id="presetBtn" disabled>
-        ✨ Aplicar Preset
+      <button onclick="resetarImagem()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300" id="resetBtn" disabled>
+        🔄 Resetar
       </button>
       <button onclick="baixarImagem()" class="btn-secondary text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" id="downloadBtn" disabled>
         💾 Baixar Imagem
@@ -103,10 +124,42 @@
     const ctx = canvas.getContext('2d');
     const canvasContainer = document.getElementById('canvasContainer');
     const instructions = document.getElementById('instructions');
-    const presetBtn = document.getElementById('presetBtn');
+    const presetBtns = document.querySelectorAll('.preset-btn');
+    const resetBtn = document.getElementById('resetBtn');
     const downloadBtn = document.getElementById('downloadBtn');
     let img = new Image();
     let originalImageData = null;
+
+    // Preset configurations
+    const presets = {
+      paisagem: {
+        brilho: 10,
+        contraste: 1.2,
+        saturacao: 1.3,
+        nitidez: 1.1,
+        calidez: -5,
+        sombras: -10,
+        altasLuzes: -5
+      },
+      casa: {
+        brilho: 15,
+        contraste: 1.05,
+        saturacao: 1.1,
+        calidez: -10,
+        nitidez: 1.05,
+        sombras: 5,
+        altasLuzes: -10
+      },
+      viagem: {
+        brilho: -5,
+        contraste: 1.3,
+        saturacao: 1.2,
+        calidez: 10,
+        nitidez: 1.15,
+        sombras: -15,
+        altasLuzes: -20
+      }
+    };
 
     document.getElementById('upload').addEventListener('change', function (e) {
       if (e.target.files[0]) {
@@ -137,7 +190,8 @@
             // Show canvas and enable buttons
             canvasContainer.style.display = 'block';
             instructions.style.display = 'none';
-            presetBtn.disabled = false;
+            presetBtns.forEach(btn => btn.disabled = false);
+            resetBtn.disabled = false;
             downloadBtn.disabled = false;
           }
           img.src = event.target.result;
@@ -146,8 +200,10 @@
       }
     });
 
-    function aplicarPreset() {
-      if (!originalImageData) return;
+    function aplicarPreset(presetType) {
+      if (!originalImageData || !presets[presetType]) return;
+      
+      const preset = presets[presetType];
       
       // Create a copy of the original image data
       const imageData = ctx.createImageData(originalImageData);
@@ -159,22 +215,51 @@
         data[i] = originalData[i];
       }
 
-      // Preset: brilho +20, contraste +15%, saturação +10%
-      const brilho = 20;
-      const contraste = 1.15;
-      const saturacao = 1.1;
-
       for (let i = 0; i < data.length; i += 4) {
-        // Aplicar brilho e contraste
-        let r = ((data[i] - 128) * contraste + 128) + brilho;
-        let g = ((data[i + 1] - 128) * contraste + 128) + brilho;
-        let b = ((data[i + 2] - 128) * contraste + 128) + brilho;
+        let r = data[i];
+        let g = data[i + 1];
+        let b = data[i + 2];
+
+        // Aplicar brilho
+        r += preset.brilho;
+        g += preset.brilho;
+        b += preset.brilho;
+
+        // Aplicar contraste
+        r = ((r - 128) * preset.contraste + 128);
+        g = ((g - 128) * preset.contraste + 128);
+        b = ((b - 128) * preset.contraste + 128);
 
         // Aplicar saturação
         const gray = 0.3 * r + 0.59 * g + 0.11 * b;
-        r = gray + (r - gray) * saturacao;
-        g = gray + (g - gray) * saturacao;
-        b = gray + (b - gray) * saturacao;
+        r = gray + (r - gray) * preset.saturacao;
+        g = gray + (g - gray) * preset.saturacao;
+        b = gray + (b - gray) * preset.saturacao;
+
+        // Aplicar calidez (ajustar temperatura de cor)
+        if (preset.calidez > 0) {
+          r += preset.calidez;
+          b -= preset.calidez * 0.5;
+        } else {
+          r += preset.calidez;
+          b -= preset.calidez;
+        }
+
+        // Aplicar ajustes de sombras e altas luzes
+        const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+        if (luminance < 128) {
+          // Sombras
+          const factor = preset.sombras / 100;
+          r += r * factor;
+          g += g * factor;
+          b += b * factor;
+        } else {
+          // Altas luzes
+          const factor = preset.altasLuzes / 100;
+          r += (255 - r) * factor;
+          g += (255 - g) * factor;
+          b += (255 - b) * factor;
+        }
 
         // Garantir que os valores estejam no range 0-255
         data[i] = Math.max(0, Math.min(255, r));
@@ -185,9 +270,11 @@
       ctx.putImageData(imageData, 0, 0);
       
       // Add visual feedback
-      presetBtn.innerHTML = '✅ Preset Aplicado!';
+      const clickedBtn = event.target;
+      const originalText = clickedBtn.innerHTML;
+      clickedBtn.innerHTML = '✅ Aplicado!';
       setTimeout(() => {
-        presetBtn.innerHTML = '✨ Aplicar Preset';
+        clickedBtn.innerHTML = originalText;
       }, 2000);
     }
 
@@ -208,13 +295,28 @@
     function resetarImagem() {
       if (originalImageData) {
         ctx.putImageData(originalImageData, 0, 0);
+        
+        // Add visual feedback
+        resetBtn.innerHTML = '✅ Resetado!';
+        setTimeout(() => {
+          resetBtn.innerHTML = '🔄 Resetar';
+        }, 2000);
       }
     }
 
     // Add keyboard shortcuts
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && !presetBtn.disabled) {
-        aplicarPreset();
+      if (e.key === '1' && !presetBtns[0].disabled) {
+        aplicarPreset('paisagem');
+      }
+      if (e.key === '2' && !presetBtns[1].disabled) {
+        aplicarPreset('casa');
+      }
+      if (e.key === '3' && !presetBtns[2].disabled) {
+        aplicarPreset('viagem');
+      }
+      if (e.key === 'r' && !resetBtn.disabled) {
+        resetarImagem();
       }
       if (e.key === 's' && e.ctrlKey && !downloadBtn.disabled) {
         e.preventDefault();
@@ -222,5 +324,5 @@
       }
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'966186dd6730f233',t:'MTc1MzY3NTgyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96618da3162bf1e2',t:'MTc1MzY3NjEwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
