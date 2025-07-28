@@ -1,535 +1,226 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>PhotoPro - Presets Profissionais</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overscroll-behavior: none;
-        }
-        
-        .ios-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .ios-card:active {
-            transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.15);
-        }
-        
-        .preset-preview {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
-            background-size: 400% 400%;
-            animation: gradientShift 3s ease infinite;
-        }
-        
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        .filter-preview {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .filter-preview::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--filter-color);
-            mix-blend-mode: var(--blend-mode);
-            opacity: var(--filter-opacity);
-        }
-        
-        .modal-backdrop {
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-        
-        .ios-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.2s ease;
-        }
-        
-        .ios-button:active {
-            transform: scale(0.98);
-        }
-        
-        .category-badge {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-        
-        .search-bar {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .intensity-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            height: 6px;
-            outline: none;
-        }
-        
-        .intensity-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #fff;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        
-        .photo-frame {
-            aspect-ratio: 4/5;
-            background: #f0f0f0;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .before-after {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .after-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 50%;
-            height: 100%;
-            overflow: hidden;
-            border-right: 2px solid white;
-        }
-        
-        .divider-line {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 2px;
-            height: 100%;
-            background: white;
-            z-index: 10;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor de Imagem com Preset</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .upload-area {
+      transition: all 0.3s ease;
+    }
+    .upload-area:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+    }
+    .canvas-container {
+      background: linear-gradient(45deg, #f0f2f5, #ffffff);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    canvas {
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      max-width: 100%;
+      height: auto;
+    }
+    .preset-info {
+      background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+      border-radius: 15px;
+      padding: 15px;
+      margin: 20px 0;
+      color: #2d3748;
+      font-weight: 500;
+    }
+  </style>
 </head>
-<body class="min-h-screen">
-    <!-- Status Bar Simulation -->
-    <div class="bg-black/20 text-white text-xs py-1 px-4 flex justify-between items-center">
-        <span>9:41</span>
-        <span>📶 📶 📶 🔋</span>
-    </div>
-
+<body class="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-pink-100 font-sans">
+  <div class="container mx-auto px-4 py-8 max-w-4xl">
     <!-- Header -->
-    <div class="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-40">
-        <div class="px-4 py-4">
-            <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold text-white">PhotoPro</h1>
-                <div class="category-badge rounded-full px-3 py-1">
-                    <span class="text-white text-sm font-medium">150+ Presets</span>
-                </div>
-            </div>
-        </div>
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">✨ Editor de Imagem</h1>
+      <p class="text-gray-600 text-lg">Transforme suas fotos com nosso preset profissional</p>
     </div>
 
-    <!-- Main App Container -->
-    <div id="mainApp" class="px-4 py-6 pb-20">
-        <!-- Search Bar -->
-        <div class="mb-6">
-            <div class="search-bar rounded-2xl px-4 py-3 flex items-center">
-                <span class="text-white/70 mr-3">🔍</span>
-                <input type="text" id="searchInput" placeholder="Buscar presets..." 
-                       class="bg-transparent text-white placeholder-white/70 flex-1 outline-none">
-            </div>
-        </div>
-
-        <!-- Quick Categories -->
-        <div class="mb-6">
-            <div class="flex space-x-3 overflow-x-auto pb-2">
-                <button onclick="filterCategory('all')" class="category-btn category-badge rounded-full px-4 py-2 text-white text-sm font-medium whitespace-nowrap active">
-                    Todos
-                </button>
-                <button onclick="filterCategory('portrait')" class="category-btn category-badge rounded-full px-4 py-2 text-white text-sm font-medium whitespace-nowrap">
-                    Retratos
-                </button>
-                <button onclick="filterCategory('landscape')" class="category-btn category-badge rounded-full px-4 py-2 text-white text-sm font-medium whitespace-nowrap">
-                    Paisagens
-                </button>
-                <button onclick="filterCategory('vintage')" class="category-btn category-badge rounded-full px-4 py-2 text-white text-sm font-medium whitespace-nowrap">
-                    Vintage
-                </button>
-                <button onclick="filterCategory('cinematic')" class="category-btn category-badge rounded-full px-4 py-2 text-white text-sm font-medium whitespace-nowrap">
-                    Cinema
-                </button>
-            </div>
-        </div>
-
-        <!-- Presets Grid -->
-        <div id="presetsGrid" class="grid grid-cols-2 gap-4">
-            <!-- Portrait Presets -->
-            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="portrait" onclick="openPreset('Skin Perfection', '✨', 'portrait', 'Suaviza a pele mantendo detalhes naturais', '#ff9a9e, #fecfef', 'overlay', '0.3')">
-                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #ff9a9e, #fecfef); --blend-mode: overlay; --filter-opacity: 0.3;"></div>
-                <h3 class="text-white font-semibold text-sm mb-1">Skin Perfection</h3>
-                <p class="text-white/70 text-xs">Retrato Profissional</p>
-            </div>
-
-            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="portrait" onclick="openPreset('Golden Portrait', '🌟', 'portrait', 'Tons dourados quentes para retratos', '#f093fb, #f5576c', 'soft-light', '0.4')">
-                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #f093fb, #f5576c); --blend-mode: soft-light; --filter-opacity: 0.4;"></div>
-                <h3 class="text-white font-semibold text-sm mb-1">Golden Portrait</h3>
-                <p class="text-white/70 text-xs">Tons Dourados</p>
-            </div>
-
-            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="portrait" onclick="openPreset('Natural Glow', '🌸', 'portrait', 'Brilho natural e saudável', '#ffecd2, #fcb69f', 'multiply', '0.25')">
-                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #ffecd2, #fcb69f); --blend-mode: multiply; --filter-opacity: 0.25;"></div>
-                <h3 class="text-white font-semibold text-sm mb-1">Natural Glow</h3>
-                <p class="text-white/70 text-xs">Brilho Natural</p>
-            </div>
-
-            <!-- Landscape Presets -->
-            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="landscape" onclick="openPreset('Sunset Magic', '🌅', 'landscape', 'Realça cores do pôr do sol', '#ff9a56, #ff6b95', 'color-burn', '0.35')">
-                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #ff9a56, #ff6b95); --blend-mode: color-burn; --filter-opacity: 0.35;"></div>
-                <h3 class="text-white font-semibold text-sm mb-1">Sunset Magic</h3>
-                <p class="text-white/70 text-xs">Pôr do Sol</p>
-            </div>
-
-            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="landscape" onclick="openPreset('Ocean Breeze', '🌊', 'landscape', 'Tons azuis refrescantes', '#4facfe, #00f2fe', 'screen', '0.3')">
-                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #4facfe, #00f2fe); --blend-mode: screen; --filter-opacity: 0.3;"></div>
-                <h3 class="text-white font-semibold text-sm mb-1">Ocean Breeze</h3>
-                <p class="text-white/70 text-xs">Tons Oceânicos</p>
-            </div>
-
-            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="landscape" onclick="openPreset('Forest Dreams', '🌲', 'landscape', 'Verdes vibrantes da natureza', '#56ab2f, #a8e6cf', 'multiply', '0.4')">
-                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #56ab2f, #a8e6cf); --blend-mode: multiply; --filter-opacity: 0.4;"></div>
-                <h3 class="text-white font-semibold text-sm mb-1">Forest Dreams</h3>
-                <p class="text-white/70 text-xs">Natureza Vibrante</p>
-            </div>
-
-            <!-- Vintage Presets -->
-            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="vintage" onclick="openPreset('Film Noir', '🎬', 'vintage', 'Estilo clássico preto e branco', '#434343, #000000', 'luminosity', '0.6')">
-                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #434343, #000000); --blend-mode: luminosity; --filter-opacity: 0.6;"></div>
-                <h3 class="text-white font-semibold text-sm mb-1">Film Noir</h3>
-                <p class="text-white/70 text-xs">P&B Clássico</p>
-            </div>
-
-            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="vintage" onclick="openPreset('Retro Warm', '📸', 'vintage', 'Tons quentes nostálgicos', '#f7971e, #ffd200', 'overlay', '0.45')">
-                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #f7971e, #ffd200); --blend-mode: overlay; --filter-opacity: 0.45;"></div>
-                <h3 class="text-white font-semibold text-sm mb-1">Retro Warm</h3>
-                <p class="text-white/70 text-xs">Nostalgia Quente</p>
-            </div>
-
-            <!-- Cinematic Presets -->
-            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="cinematic" onclick="openPreset('Teal & Orange', '🎥', 'cinematic', 'Look cinematográfico profissional', '#ff7e5f, #feb47b', 'color-dodge', '0.35')">
-                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #ff7e5f, #feb47b); --blend-mode: color-dodge; --filter-opacity: 0.35;"></div>
-                <h3 class="text-white font-semibold text-sm mb-1">Teal & Orange</h3>
-                <p class="text-white/70 text-xs">Cinema Profissional</p>
-            </div>
-
-            <div class="preset-card ios-card rounded-2xl p-4 cursor-pointer" data-category="cinematic" onclick="openPreset('Moody Blue', '🌙', 'cinematic', 'Atmosfera dramática azulada', '#2196f3, #21cbf3', 'multiply', '0.4')">
-                <div class="photo-frame rounded-xl mb-3 preset-preview filter-preview" style="--filter-color: linear-gradient(45deg, #2196f3, #21cbf3); --blend-mode: multiply; --filter-opacity: 0.4;"></div>
-                <h3 class="text-white font-semibold text-sm mb-1">Moody Blue</h3>
-                <p class="text-white/70 text-xs">Drama Azulado</p>
-            </div>
-        </div>
+    <!-- Upload Area -->
+    <div class="upload-area bg-white rounded-2xl p-8 mb-6 border-2 border-dashed border-gray-300 hover:border-purple-400">
+      <div class="text-center">
+        <div class="text-6xl mb-4">📸</div>
+        <label for="upload" class="cursor-pointer">
+          <span class="text-xl font-semibold text-gray-700 hover:text-purple-600">Clique para selecionar uma imagem</span>
+          <input type="file" id="upload" accept="image/*" class="hidden">
+        </label>
+        <p class="text-gray-500 mt-2">Suporta JPG, PNG e outros formatos</p>
+      </div>
     </div>
 
-    <!-- Preset Detail Modal -->
-    <div id="presetModal" class="fixed inset-0 bg-black/50 modal-backdrop z-50 hidden">
-        <div class="h-full flex flex-col">
-            <!-- Modal Header -->
-            <div class="bg-white/10 backdrop-blur-md border-b border-white/20 px-4 py-4">
-                <div class="flex items-center justify-between">
-                    <button onclick="closePreset()" class="text-white/70 hover:text-white">
-                        <span class="text-lg">← Voltar</span>
-                    </button>
-                    <h2 id="presetTitle" class="text-white font-semibold">Skin Perfection</h2>
-                    <button onclick="savePreset()" class="text-blue-400 font-medium">Salvar</button>
-                </div>
-            </div>
-
-            <!-- Photo Preview -->
-            <div class="flex-1 p-4">
-                <div class="bg-white/5 rounded-2xl p-4 mb-6">
-                    <div class="before-after photo-frame rounded-xl mx-auto max-w-sm relative">
-                        <div class="w-full h-full bg-gradient-to-br from-gray-300 to-gray-500 rounded-xl flex items-center justify-center">
-                            <span class="text-gray-600 text-sm">Foto Original</span>
-                        </div>
-                        <div class="after-overlay">
-                            <div id="presetPreview" class="w-full h-full bg-gradient-to-br from-gray-300 to-gray-500 rounded-xl flex items-center justify-center filter-preview">
-                                <span class="text-gray-600 text-sm">Com Preset</span>
-                            </div>
-                        </div>
-                        <div class="divider-line"></div>
-                    </div>
-                </div>
-
-                <!-- Preset Info -->
-                <div class="ios-card rounded-2xl p-4 mb-4">
-                    <div class="flex items-center mb-3">
-                        <span id="presetIcon" class="text-2xl mr-3">✨</span>
-                        <div>
-                            <h3 id="presetName" class="text-white font-semibold">Skin Perfection</h3>
-                            <p id="presetCategory" class="text-white/70 text-sm">Retrato Profissional</p>
-                        </div>
-                    </div>
-                    <p id="presetDescription" class="text-white/80 text-sm leading-relaxed">
-                        Suaviza a pele mantendo detalhes naturais
-                    </p>
-                </div>
-
-                <!-- Intensity Control -->
-                <div class="ios-card rounded-2xl p-4 mb-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-white font-medium">Intensidade</span>
-                        <span id="intensityValue" class="text-white/70">50%</span>
-                    </div>
-                    <input type="range" id="intensitySlider" class="intensity-slider w-full" 
-                           min="0" max="100" value="50" oninput="updateIntensity(this.value)">
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="space-y-3">
-                    <button onclick="applyPreset()" class="ios-button w-full text-white font-semibold py-4 rounded-2xl">
-                        Aplicar Preset
-                    </button>
-                    <button onclick="sharePreset()" class="ios-card w-full text-white font-medium py-3 rounded-2xl border border-white/20">
-                        Compartilhar
-                    </button>
-                </div>
-            </div>
-        </div>
+    <!-- Preset Info -->
+    <div class="preset-info text-center">
+      <h3 class="font-bold text-lg mb-2">🎨 Preset Profissional</h3>
+      <p>Brilho +20 • Contraste +15% • Saturação +10%</p>
     </div>
 
-    <!-- Bottom Navigation -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20">
-        <div class="flex justify-around py-2">
-            <button class="flex flex-col items-center py-2 px-4 text-white">
-                <span class="text-xl mb-1">🏠</span>
-                <span class="text-xs">Início</span>
-            </button>
-            <button class="flex flex-col items-center py-2 px-4 text-white/60">
-                <span class="text-xl mb-1">❤️</span>
-                <span class="text-xs">Favoritos</span>
-            </button>
-            <button class="flex flex-col items-center py-2 px-4 text-white/60">
-                <span class="text-xl mb-1">📁</span>
-                <span class="text-xs">Meus Presets</span>
-            </button>
-            <button class="flex flex-col items-center py-2 px-4 text-white/60">
-                <span class="text-xl mb-1">⚙️</span>
-                <span class="text-xs">Configurações</span>
-            </button>
-        </div>
+    <!-- Action Buttons -->
+    <div class="flex flex-wrap justify-center gap-4 mb-8">
+      <button onclick="aplicarPreset()" class="btn-primary text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" id="presetBtn" disabled>
+        ✨ Aplicar Preset
+      </button>
+      <button onclick="baixarImagem()" class="btn-secondary text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" id="downloadBtn" disabled>
+        💾 Baixar Imagem
+      </button>
     </div>
 
-    <script>
-        let currentPreset = null;
+    <!-- Canvas Container -->
+    <div class="canvas-container text-center" id="canvasContainer" style="display: none;">
+      <canvas id="canvas" class="max-w-full h-auto"></canvas>
+    </div>
 
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const presetCards = document.querySelectorAll('.preset-card');
-            
-            presetCards.forEach(card => {
-                const presetName = card.querySelector('h3').textContent.toLowerCase();
-                if (presetName.includes(searchTerm)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
+    <!-- Instructions -->
+    <div class="text-center mt-8 text-gray-600" id="instructions">
+      <p class="text-lg">👆 Comece selecionando uma imagem acima</p>
+    </div>
+  </div>
 
-        // Category filtering
-        function filterCategory(category) {
-            const presetCards = document.querySelectorAll('.preset-card');
-            const categoryBtns = document.querySelectorAll('.category-btn');
-            
-            // Update active button
-            categoryBtns.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Filter presets
-            presetCards.forEach(card => {
-                if (category === 'all' || card.dataset.category === category) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const canvasContainer = document.getElementById('canvasContainer');
+    const instructions = document.getElementById('instructions');
+    const presetBtn = document.getElementById('presetBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    let img = new Image();
+    let originalImageData = null;
 
-        // Open preset detail
-        function openPreset(name, icon, category, description, filterColor, blendMode, opacity) {
-            currentPreset = { name, icon, category, description, filterColor, blendMode, opacity };
+    document.getElementById('upload').addEventListener('change', function (e) {
+      if (e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          img.onload = function () {
+            // Set canvas size to fit the image while maintaining aspect ratio
+            const maxWidth = 800;
+            const maxHeight = 600;
+            let { width, height } = img;
             
-            document.getElementById('presetTitle').textContent = name;
-            document.getElementById('presetName').textContent = name;
-            document.getElementById('presetIcon').textContent = icon;
-            document.getElementById('presetCategory').textContent = getCategoryName(category);
-            document.getElementById('presetDescription').textContent = description;
-            
-            // Update preview
-            const preview = document.getElementById('presetPreview');
-            preview.style.setProperty('--filter-color', `linear-gradient(45deg, ${filterColor})`);
-            preview.style.setProperty('--blend-mode', blendMode);
-            preview.style.setProperty('--filter-opacity', opacity);
-            
-            document.getElementById('presetModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Close preset detail
-        function closePreset() {
-            document.getElementById('presetModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        // Update intensity
-        function updateIntensity(value) {
-            document.getElementById('intensityValue').textContent = value + '%';
-            const preview = document.getElementById('presetPreview');
-            const newOpacity = (value / 100) * parseFloat(currentPreset.opacity);
-            preview.style.setProperty('--filter-opacity', newOpacity.toString());
-        }
-
-        // Apply preset
-        function applyPreset() {
-            const presetName = document.getElementById('presetName').textContent;
-            const intensity = document.getElementById('intensitySlider').value;
-            
-            // Simulate applying preset
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-20 left-4 right-4 bg-green-500 text-white p-4 rounded-2xl z-60 text-center';
-            notification.innerHTML = `
-                <div class="flex items-center justify-center">
-                    <span class="mr-2">✅</span>
-                    Preset "${presetName}" aplicado com ${intensity}% de intensidade!
-                </div>
-            `;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-                closePreset();
-            }, 2000);
-        }
-
-        // Save preset
-        function savePreset() {
-            const presetName = document.getElementById('presetName').textContent;
-            
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-20 left-4 right-4 bg-blue-500 text-white p-4 rounded-2xl z-60 text-center';
-            notification.innerHTML = `
-                <div class="flex items-center justify-center">
-                    <span class="mr-2">💾</span>
-                    Preset "${presetName}" salvo nos favoritos!
-                </div>
-            `;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 2000);
-        }
-
-        // Share preset
-        function sharePreset() {
-            const presetName = document.getElementById('presetName').textContent;
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: `Preset ${presetName} - PhotoPro`,
-                    text: `Confira este preset incrível: ${presetName}`,
-                    url: window.location.href
-                });
-            } else {
-                const shareText = `Confira este preset incrível: ${presetName} - PhotoPro`;
-                navigator.clipboard.writeText(shareText).then(() => {
-                    const notification = document.createElement('div');
-                    notification.className = 'fixed top-20 left-4 right-4 bg-purple-500 text-white p-4 rounded-2xl z-60 text-center';
-                    notification.innerHTML = `
-                        <div class="flex items-center justify-center">
-                            <span class="mr-2">📋</span>
-                            Link copiado para compartilhar!
-                        </div>
-                    `;
-                    document.body.appendChild(notification);
-                    
-                    setTimeout(() => {
-                        notification.remove();
-                    }, 2000);
-                });
+            if (width > maxWidth) {
+              height = (height * maxWidth) / width;
+              width = maxWidth;
             }
-        }
-
-        // Helper function
-        function getCategoryName(category) {
-            const names = {
-                'portrait': 'Retrato Profissional',
-                'landscape': 'Paisagem',
-                'vintage': 'Vintage',
-                'cinematic': 'Cinematográfico'
-            };
-            return names[category] || category;
-        }
-
-        // Prevent zoom on double tap
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function (event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
+            if (height > maxHeight) {
+              width = (width * maxHeight) / height;
+              height = maxHeight;
             }
-            lastTouchEnd = now;
-        }, false);
-
-        // Close modal on backdrop click
-        document.getElementById('presetModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closePreset();
-            }
-        });
-
-        // Add haptic feedback simulation
-        function hapticFeedback() {
-            if (navigator.vibrate) {
-                navigator.vibrate(10);
-            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Store original image data
+            originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Show canvas and enable buttons
+            canvasContainer.style.display = 'block';
+            instructions.style.display = 'none';
+            presetBtn.disabled = false;
+            downloadBtn.disabled = false;
+          }
+          img.src = event.target.result;
         }
+        reader.readAsDataURL(e.target.files[0]);
+      }
+    });
 
-        // Add haptic feedback to buttons
-        document.querySelectorAll('button, .preset-card').forEach(element => {
-            element.addEventListener('touchstart', hapticFeedback);
-        });
-    </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9661719513c9e83a',t:'MTc1MzY3NDk1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    function aplicarPreset() {
+      if (!originalImageData) return;
+      
+      // Create a copy of the original image data
+      const imageData = ctx.createImageData(originalImageData);
+      const data = imageData.data;
+      const originalData = originalImageData.data;
+      
+      // Copy original data
+      for (let i = 0; i < data.length; i++) {
+        data[i] = originalData[i];
+      }
+
+      // Preset: brilho +20, contraste +15%, saturação +10%
+      const brilho = 20;
+      const contraste = 1.15;
+      const saturacao = 1.1;
+
+      for (let i = 0; i < data.length; i += 4) {
+        // Aplicar brilho e contraste
+        let r = ((data[i] - 128) * contraste + 128) + brilho;
+        let g = ((data[i + 1] - 128) * contraste + 128) + brilho;
+        let b = ((data[i + 2] - 128) * contraste + 128) + brilho;
+
+        // Aplicar saturação
+        const gray = 0.3 * r + 0.59 * g + 0.11 * b;
+        r = gray + (r - gray) * saturacao;
+        g = gray + (g - gray) * saturacao;
+        b = gray + (b - gray) * saturacao;
+
+        // Garantir que os valores estejam no range 0-255
+        data[i] = Math.max(0, Math.min(255, r));
+        data[i + 1] = Math.max(0, Math.min(255, g));
+        data[i + 2] = Math.max(0, Math.min(255, b));
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+      
+      // Add visual feedback
+      presetBtn.innerHTML = '✅ Preset Aplicado!';
+      setTimeout(() => {
+        presetBtn.innerHTML = '✨ Aplicar Preset';
+      }, 2000);
+    }
+
+    function baixarImagem() {
+      const link = document.createElement('a');
+      link.download = 'imagem-editada.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      
+      // Add visual feedback
+      downloadBtn.innerHTML = '✅ Baixado!';
+      setTimeout(() => {
+        downloadBtn.innerHTML = '💾 Baixar Imagem';
+      }, 2000);
+    }
+
+    // Reset functionality
+    function resetarImagem() {
+      if (originalImageData) {
+        ctx.putImageData(originalImageData, 0, 0);
+      }
+    }
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !presetBtn.disabled) {
+        aplicarPreset();
+      }
+      if (e.key === 's' && e.ctrlKey && !downloadBtn.disabled) {
+        e.preventDefault();
+        baixarImagem();
+      }
+    });
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'966186dd6730f233',t:'MTc1MzY3NTgyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
